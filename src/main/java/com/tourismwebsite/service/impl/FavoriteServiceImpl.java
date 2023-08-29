@@ -39,7 +39,7 @@ public class FavoriteServiceImpl implements FavoriteService {
         try {
             jedis = JedisUtil.getJedis();
             String lua_Script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
-            Long result = (Long) jedis.evalsha(jedis.scriptLoad(lua_Script), Arrays.asList(Constant.USER_FAVORITE_TOKEY_TEST + uid), Arrays.asList(testToken));
+            Long result = (Long) jedis.evalsha(jedis.scriptLoad(lua_Script), Collections.singletonList(Constant.USER_FAVORITE_TOKEY_TEST + uid), Collections.singletonList(testToken));
 
         if (result == 0L){
           count = -2;
@@ -66,7 +66,7 @@ public class FavoriteServiceImpl implements FavoriteService {
                     connection.setAutoCommit(true);
                 }
                 if (jedis != null){
-                    jedis.close();
+                    JedisUtil.close(jedis);
                 }
 
 
@@ -110,7 +110,7 @@ public class FavoriteServiceImpl implements FavoriteService {
         try {
             jedis = JedisUtil.getJedis();
             String lua_Script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
-            Long result = (Long) jedis.evalsha(jedis.scriptLoad(lua_Script), Arrays.asList(Constant.USER_FAVORITE_TOKEY_TEST + uid), Arrays.asList(testToken));
+            Long result = (Long) jedis.evalsha(jedis.scriptLoad(lua_Script), Collections.singletonList(Constant.USER_FAVORITE_TOKEY_TEST + uid), Collections.singletonList(testToken));
 
             if (result == 0L){
                 count = -1;
