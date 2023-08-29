@@ -33,36 +33,46 @@ public class FavoriteServiceImpl implements FavoriteService {
 
     @Override
     public int addFavorite(Long rid, String testToken, int uid) throws SQLException {
-        Jedis jedis = JedisUtil.getJedis();
-        String lua_Script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
-        Long result = (Long) jedis.evalsha(jedis.scriptLoad(lua_Script), Arrays.asList(Constant.USER_FAVORITE_TOKEY_TEST + uid), Arrays.asList(testToken));
-
         int count = 0;
+        Connection connection = null;
+        Jedis jedis = null;
+        try {
+            jedis = JedisUtil.getJedis();
+            String lua_Script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+            Long result = (Long) jedis.evalsha(jedis.scriptLoad(lua_Script), Arrays.asList(Constant.USER_FAVORITE_TOKEY_TEST + uid), Arrays.asList(testToken));
+
         if (result == 0L){
           count = -2;
         }else {
             DataSource dataSource = JDBCUtil.getDataSource();
             JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
             TransactionSynchronizationManager.initSynchronization();//开启事务管理器
-            Connection connection = DataSourceUtils.getConnection(dataSource);//ThreadLocal 保证jdbcTemplate 和 connection 使用同一个连接,线程共享对象
+            connection = DataSourceUtils.getConnection(dataSource);//ThreadLocal 保证jdbcTemplate 和 connection 使用同一个连接,线程共享对象
             connection.setAutoCommit(false);
 
-            try {
-                favoriteDao.addFavorite(rid, DateUtil.getCurrentDate(),uid,jdbcTemplate);
-                routeDao.updateRouteAddCount(rid,jdbcTemplate);
-                connection.commit();
-
-            } catch (Exception e) {
+            favoriteDao.addFavorite(rid, DateUtil.getCurrentDate(), uid, jdbcTemplate);
+            routeDao.updateRouteAddCount(rid, jdbcTemplate);
+            connection.commit();
+        }
+        } catch (Exception e) {
                 e.printStackTrace();
-                connection.rollback();
+                if (connection != null){
+                    connection.rollback();
+                }
             }finally {
                 //恢复自动提交事务,释放当前线程与连接对象的绑定
                 TransactionSynchronizationManager.clearSynchronization();
-                connection.setAutoCommit(true);
+                if (connection != null){
+                    connection.setAutoCommit(true);
+                }
+                if (jedis != null){
+                    jedis.close();
+                }
+
+
             }
 
 //            count = routeDao.findRouteCountByRid(rid);
-        }
 
         return  count;
     }
@@ -92,32 +102,44 @@ public class FavoriteServiceImpl implements FavoriteService {
 
     @Override
     public int cancelFavorite(int uid, Long rid, String testToken) throws SQLException {
-        Jedis jedis = JedisUtil.getJedis();
-        String lua_Script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
-        Long result = (Long) jedis.evalsha(jedis.scriptLoad(lua_Script), Arrays.asList(Constant.USER_FAVORITE_TOKEY_TEST + uid), Arrays.asList(testToken));
-        int count;
-        if (result == 0L){
-            count = -1;
-        }else {
 
-            DataSource dataSource = JDBCUtil.getDataSource();
-            JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-            TransactionSynchronizationManager.initSynchronization();
-            Connection connection = DataSourceUtils.getConnection(dataSource);
-            connection.setAutoCommit(false);
+        Connection connection = null;
+        Jedis jedis = null;
 
-            try {
+        int count = 0;
+        try {
+            jedis = JedisUtil.getJedis();
+            String lua_Script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+            Long result = (Long) jedis.evalsha(jedis.scriptLoad(lua_Script), Arrays.asList(Constant.USER_FAVORITE_TOKEY_TEST + uid), Arrays.asList(testToken));
+
+            if (result == 0L){
+                count = -1;
+            }else {
+
+                DataSource dataSource = JDBCUtil.getDataSource();
+                JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+                TransactionSynchronizationManager.initSynchronization();
+                connection = DataSourceUtils.getConnection(dataSource);
+                connection.setAutoCommit(false);
                 favoriteDao.delFavorite(rid,uid,jdbcTemplate);
                 routeDao.updateRouteMinusCount(rid,jdbcTemplate);
                 connection.commit();
-            } catch (Exception e) {
-                connection.rollback();
-                e.printStackTrace();
-            }finally {
-                TransactionSynchronizationManager.clearSynchronization(); /*恢复自动提交事务,释放当前线程和对象的绑定*/
-                connection.setAutoCommit(true);
             }
-            count = routeDao.findRouteCountByRid(rid);
+
+        } catch (Exception e) {
+           if ( connection != null){
+               connection.rollback();
+           }
+            e.printStackTrace();
+        }finally {
+            TransactionSynchronizationManager.clearSynchronization(); /*恢复自动提交事务,释放当前线程和对象的绑定*/
+           if ( connection != null){
+               connection.setAutoCommit(true);
+           }
+           if (jedis != null){
+               JedisUtil.close(jedis);
+           }
+
         }
 
 
