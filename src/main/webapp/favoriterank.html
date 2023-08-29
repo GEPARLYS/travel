@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>收藏排行榜</title>
+        <link rel="stylesheet" type="text/css" href="css/common.css">
+        <link rel="stylesheet" type="text/css" href="css/ranking-list.css">
+        <script src="js/jquery-3.3.1.js"></script>
+        <script src="js/getParameter.js"></script>
+        <script type="text/javascript">
+            var currentPage = getParameter("currentPage");
+            //获取rname
+            var rname = getParameter("rname");
+            //获取minPrice
+            var minPrice = getParameter("minPrice");
+            //获取maxPrice
+            var maxPrice = getParameter("maxPrice");
+            $.post("route","action=favoriteRank&currentPage="+currentPage+"&rname="+rname+"&minPrice="+minPrice+"&maxPrice="+maxPrice,function (result) {
+                var pageBean = result.data;
+                currentPage = pageBean.currentPage
+                var totalPage = pageBean.totalPage;
+                var pageSize = pageBean.pageSize;
+                var totalSize = pageBean.totalSize;
+                var list = pageBean.list;
+                //遍历出每一条路线并且展示
+                //遍历出每一条路线并且展示
+                $.each(list,function (index,element) {
+                    var cla = "three";
+                    var num = (currentPage-1)*pageSize + (index + 1)
+
+                    if (num == 1) {
+                        cla = "one"
+                    }
+                    if (num == 2) {
+                        cla = "two"
+                    }
+
+                    $("#content").append("<li>\n" +
+                        "                        <span class=\"num "+cla+"\">"+num+"</span>\n" +
+                        "                        <a href=\"route_detail.html?rid="+this.rid+"\"><img src=\""+this.rimage+"\" alt=\"\"></a>\n" +
+                        "                        <h4><a href=\"route_detail.html?rid="+this.rid+"\">"+this.rname+"</a></h4>\n" +
+                        "                        <p>\n" +
+                        "                            <b class=\"price\">&yen;<span>"+this.price+"</span>起</b>\n" +
+                        "                            <span class=\"shouchang\">已收藏"+this.count+"次</span>\n" +
+                        "                        </p>\n" +
+                        "                    </li>")
+                })
+
+
+                if (pageSize < totalSize){
+
+                    $(".page_num_info").append("<i></i> 共\n" +
+                        "                        <span>"+totalPage+"</span>页<span>"+totalSize+"</span>条")
+
+                    if(currentPage != 1){
+                        $(".pageNum ul").append("<li><a href=\"favoriterank.html?currentPage=1&rname="+rname+"&minPrice="+minPrice+"&maxPrice="+maxPrice+"\">首页</a></li>\n" +
+                            "                            <li class=\"threeword\"><a href=\"favoriterank.html?currentPage="+(currentPage-1)+"&rname="+rname+"&minPrice="+minPrice+"&maxPrice="+maxPrice+"\">上一页</a></li>")
+                    }
+                    var begin = 1
+                    var end = 10
+
+                    //如果currentPage>6,那么begin=currentPage-5,end=currentPage+4
+                    if(currentPage>6){
+                        begin = currentPage - 5
+                        end = currentPage + 4
+                    }
+
+                    //再思考，如果end>总页数，那么说明出问题了，end最大只能等于总页数
+                    if(end > totalPage){
+                        end = totalPage
+                    }
+                    //中间拼接页码
+                    for(var i=begin;i<=end;i++){
+                        //判断，如果i=当前页数，那么该页高亮显示
+                        if (i == currentPage) {
+                            $(".pageNum ul").append("<li style='background-color: orange'><a href=\"javascript:;\">"+i+"</a></li>")
+                        }else {
+                            $(".pageNum ul").append("<li><a href=\"favoriterank.html?currentPage="+i+"&rname="+rname+"&minPrice="+minPrice+"&maxPrice="+maxPrice+"\">"+i+"</a></li>")
+                        }
+
+                    }
+
+                    //如果当前页不等于总页数，就拼接
+                    if(currentPage != totalPage){
+                        $(".pageNum ul").append("<li class=\"threeword\"><a href=\"favoriterank.html?currentPage="+(currentPage+1)+"&rname="+rname+"&minPrice="+minPrice+"&maxPrice="+maxPrice+"\">下一页</a></li>\n" +
+                            "                            <li class=\"threeword\"><a href=\"favoriterank.html?currentPage="+totalPage+"&rname="+rname+"&minPrice="+minPrice+"&maxPrice="+maxPrice+"\">末页</a></li>")
+                    }
+
+                }
+                //展示页码部分
+                //什么时候拼接首页上一页，当前页不等于1
+
+                //数据回显
+                //页面加载之后，将搜索条件回显到搜索框中
+                //也就是设置搜索框的value值
+                //将rname转换成中文
+                rname = decodeURI(rname)
+                if (rname == null || rname == "null") {
+                    rname = ""
+                }
+                $("#rname").val(rname)
+                $("#minPrice").val(minPrice)
+                $("#maxPrice").val(maxPrice)
+            },"json")
+
+            //搜索的方法
+            function searchFavoriteRank() {
+                //跳转到favoriteRank
+                //搜索的话，还需要携带搜索条件
+                location.href = "favoriterank.html?currentPage=1&rname="+$("#rname").val()+"&minPrice="+$("#minPrice").val()+"&maxPrice="+$("#maxPrice").val()
+            }
+
+        </script>
+    </head>
+    <body>
+    <!--引入头部-->
+    <div id="header"></div>
+        <div class="contant">
+            <div class="shaixuan">
+                <span>线路名称</span>
+                <input type="text" id="rname">
+                <span>金额</span>
+                <input type="text" id="minPrice" value="">~<input type="text" id="maxPrice" value="">
+                <button onclick="searchFavoriteRank()">搜索</button>
+            </div>
+            <div class="list clearfix">
+                <ul id="content">
+
+                </ul>
+
+            </div>
+
+            <div class="page_num_info">
+
+            </div>
+
+            <div class="pageNum">
+                <ul>
+
+                </ul>
+            </div>
+
+
+        </div>
+    	
+         <!--导入底部-->
+   		 <div id="footer"></div>
+    <!--导入布局js，共享header和footer-->
+    <script type="text/javascript" src="js/include.js"></script>
+    </body>
+</html>

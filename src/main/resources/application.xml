@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<application>
+    <context id="userService">
+        com.tourismwebsite.service.impl.UserServiceImpl
+    </context>
+    <context id="userDao">
+        com.tourismwebsite.dao.impl.UserDaoImpl
+    </context>
+
+    <context id="categoryService">
+        com.tourismwebsite.service.impl.CategoryServiceImpl
+    </context>
+
+    <context id="categoryDao">
+        com.tourismwebsite.dao.impl.CategoryDaoImpl
+    </context>
+
+    <context id="routeService">
+        com.tourismwebsite.service.impl.RouteServiceImpl
+    </context>
+
+    <context id="routeDao">
+        com.tourismwebsite.dao.impl.RouteDaoImpl
+    </context>
+
+    <context id="favoriteService">
+        com.tourismwebsite.service.impl.FavoriteServiceImpl
+    </context>
+
+    <context id="favoriteDao">
+        com.tourismwebsite.dao.impl.FavoriteDaoImpl
+    </context>
+</application>

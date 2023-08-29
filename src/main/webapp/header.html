@@ -1,0 +1,97 @@
+<!-- 头部 start -->
+<header id="header">
+    <div class="top_banner">
+        <img src="images/top_banner.jpg" alt="">
+    </div>
+    <script src="js/getParameter.js"></script>
+    <div class="shortcut">
+        <script>
+            /**
+             * 退出登录
+             */
+            function logout() {
+                //退出登录，发送一个异步请求到UserServlet
+                $.post("user","action=logout",function (result) {
+                    var data = result.data;
+                    if (data) {
+                        //表示退出成功，跳转到登录页面
+                        location.href = "login.html"
+                    }
+                },"json")
+            }
+            //发送异步请求到UserServlet，获取当前用户的登录状态
+            $.post("user","action=getUserInfo",function (result) {
+                var user = result.data;
+
+                if (user != null) {
+                    //登录成功
+                    $(".shortcut").append(" <div class=\"login\">\n" +
+                        "            \t\n" +
+                        "                <span>欢迎回来，"+user.name+"</span>\n" +
+                        "                <a href=\"myfavorite.html?currentPage=1\" class=\"collection\">我的收藏</a>\n" +
+                        "                <a href=\"javascript:;\" onclick='logout()'>退出</a>\n" +
+                        "            </div>")
+                }else {
+                    //登陆失败
+                    $(".shortcut").append("<div class=\"login_out\">\n" +
+                        "                <a href=\"login.html\">登录</a>\n" +
+                        "                <a href=\"register.html\">注册</a>\n" +
+                        "            </div>")
+                }
+            },"json");
+
+            $.post("category","action=findAll",function (result) {
+                var data = result.data;
+                //eval()方法,可以将普通字符转成js对象
+                 data = eval("("+data+")");
+
+                $.each(data,function () {
+
+                    $(".nav").append("<li><a href=\"route_list.html?cid="+this.cid+"&currentPage=1\">"+this.cname+"</a></li>")
+                });
+                $(".nav").append("<li><a href='favoriterank.html?currentPage=1'>收藏排行榜</a></li>")
+
+
+            },"json");
+
+            function searchRoute(){
+                var cid = getParameter("cid");
+                location.href = "route_list.html?currentPage=1&cid="+cid+"&keyword="+$("#keyword").val();
+            }
+        </script>
+        <!-- 未登录状态  -->
+
+
+
+        <!-- 登录状态  -->
+
+    </div>
+    <div class="header_wrap">
+        <div class="topbar">
+            <div class="logo">
+                <a href="/"><img src="images/logo.jpg" alt=""></a>
+            </div>
+            <div class="search">
+                <input name="" type="text" id="keyword" placeholder="请输入路线名称" class="search_input" autocomplete="off">
+                <a href="javascript:;" class="search-button" onclick="searchRoute()">搜索</a>
+            </div>
+            <div class="hottel">
+                <div class="hot_pic">
+                    <img src="images/hot_tel.jpg" alt="">
+                </div>
+                <div class="hot_tel">
+                    <p class="hot_time">客服热线(9:00-6:00)</p>
+                    <p class="hot_num">400-618-9090</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- 头部 end -->
+<!-- 首页导航 -->
+<div class="navitem">
+    <ul class="nav">
+        <li class="nav-active"><a href="index.html">首页</a></li>
+    </ul>
+</div>
+    
