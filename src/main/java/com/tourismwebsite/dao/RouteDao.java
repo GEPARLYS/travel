@@ -19,7 +19,7 @@ public interface RouteDao {
 
     List<Route> findThemeList();
 
-    List<Route> findPageList(Long cid, Long currentPage, Integer pageSize, String keyword);
+    List<Route> findPageList(Long cid, Long currentPage, Integer pageSize, String keyword, String minPrice, String maxPrice);
 
     Long findCountPage(Long cid, String keyword);
 

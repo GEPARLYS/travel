@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>黑马旅游-搜索</title>
     <link rel="stylesheet" type="text/css" href="css/common.css">
+    <link rel="stylesheet" type="text/css" href="css/condition-search.css">
     <link rel="stylesheet" href="css/search.css">
     <script src="js/jquery-3.3.1.js"></script>
     <script src="js/getParameter.js"></script>
@@ -15,8 +16,13 @@
     var cid = getParameter("cid");
     var currentPage = getParameter("currentPage");
     var keyword = getParameter("keyword");
+    var rname = getParameter("rname");
+    var minPrice = getParameter("minPrice");
+    var maxPrice = getParameter("maxPrice");
 
-    $.post("route","action=getRoutesByCid&cid="+cid+"&currentPage="+currentPage+"&keyword="+keyword,function (result) {
+    // $.post("route","action=getRoutesByCid&cid="+cid+"&currentPage="+currentPage+"&keyword="+keyword,function (result) {
+    $.post("route", "action=getRoutesByCid&cid="+cid+"&currentPage=" + currentPage + "&keyword=" + keyword + "&minPrice=" + minPrice + "&maxPrice=" + maxPrice, function(result) {
+
         var data = result.data;//data就对应那个PageBean对象
         currentPage = data.currentPage;//当前页数
         var pageSize = data.pageSize;//每页的数据条数
@@ -52,7 +58,7 @@
 
             //什么时候拼接首页上一页，当前页不等于1
             if(currentPage != 1){
-                $(".pageNum ul").append("<li><a href=\"route_list.html?cid="+cid+"&currentPage=1&keyword="+keyword+"\">首页1</a></li>\n" +
+                $(".pageNum ul").append("<li><a href=\"route_list.html?cid="+cid+"&currentPage=1&keyword="+keyword+"\">首页</a></li>\n" +
                     "                            <li class=\"threeword\"><a href=\"route_list.html?cid="+cid+"&currentPage="+(currentPage-1)+"&keyword="+keyword+"\">上一页</a></li>")
             }
             var begin = 1;
@@ -74,19 +80,74 @@
                 if (i == currentPage) {
                     $(".pageNum ul").append("<li style='background-color: orange'><a href=\"javascript:;\">"+i+"</a></li>")
                 }else {
-                    $(".pageNum ul").append("<li><a href=\"route_list.html?cid="+cid+"&currentPage="+i+"&keyword="+keyword+"\">"+i+"</a></li>")
+                    $(".pageNum ul").append("<li><a href=\"route_list.html?cid="+cid+"&currentPage="+i+"&keyword="+keyword+"&rname="+rname+"&minPrice="+minPrice+"&maxPrice="+maxPrice+"\">"+i+"</a></li>")
                 }
 
             }
 
             //如果当前页不等于总页数，就拼接
             if(currentPage != totalPage){
-                $(".pageNum ul").append("<li class=\"threeword\"><a href=\"route_list.html?cid="+cid+"&currentPage="+(currentPage+1)+"&keyword="+keyword+"\">下一页</a></li>\n" +
-                    "                            <li class=\"threeword\"><a href=\"route_list.html?cid="+cid+"&currentPage="+totalPage+"&keyword="+keyword+"\">末页</a></li>")
+                $(".pageNum ul").append("<li class=\"threeword\"><a href=\"route_list.html?cid="+cid+"&currentPage="+(currentPage+1)+"&keyword="+keyword+"&rname="+rname+"&minPrice="+minPrice+"&maxPrice="+maxPrice+"\">下一页</a></li>\n" +
+                    "                            <li class=\"threeword\"><a href=\"route_list.html?cid="+cid+"&currentPage="+totalPage+"&keyword="+keyword+"&rname="+rname+"&minPrice="+minPrice+"&maxPrice="+maxPrice+"\">末页</a></li>")
             }
         }
 
+
+        rname = decodeURI(keyword)
+        if (keyword == null || keyword == "null") {
+            keyword = ""
+        }
+        rname = decodeURI(rname)
+        if (rname == null || rname == "null") {
+            rname = ""
+        }
+        $("#rname").val(rname)
+
+        if (minPrice == null || minPrice == "null") {
+            minPrice = ""
+        }
+        $("#minPrice").val(minPrice)
+        if (maxPrice == null || maxPrice == "null") {
+            maxPrice = ""
+        }
+        $("#maxPrice").val(maxPrice)
+
     },"json")
+    function searchFavoriteRank() {
+        
+        //跳转到favoriteRank
+        //搜索的话，还需要携带搜索条件
+        // location.href = "route_list.html?currentPage=1&rname="+$("#rname").val()+"&minPrice="+$("#minPrice").val()+"&maxPrice="+$("#maxPrice").val()
+        location.href = "route_list.html?cid="+cid+"&currentPage=1&keyword=" + $("#rname").val() + "&minPrice=" + $("#minPrice").val() + "&maxPrice=" + $("#maxPrice").val();
+
+    }
+
+    function validatePrice(input) {
+        // 只允许输入数字和小数点，并自动去除多余小数点
+        let value = input.value;
+        value = value.replace(/[^\d.]/g, "");    // 只保留数字和.
+        value = value.replace(/^\./g, "");       // 开头不能是.
+        value = value.replace(/\.{2,}/g, ".");   // 连续两个.只保留一个
+        value = value.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".");
+        // 最多两位小数
+        value = value.replace(/^(\d+)\.(\d{0,2}).*$/, '$1.$2');
+        input.value = value;
+    }
+
+
+    function formatMoney(input) {
+        let value = input.value;
+        if (!value) return;
+        // 转成浮点数
+        let num = parseFloat(value);
+        if (isNaN(num)) {
+            input.value = '';
+            return;
+        }
+        // 保留两位小数并加千分位
+        input.value = num.toLocaleString('zh-CN', {minimumFractionDigits: 0, maximumFractionDigits: 2});
+    }
+
 </script>
 <body>
 <!--引入头部-->
@@ -95,7 +156,14 @@
         <div class="contant">
             <div class="crumbs">
                 <img src="images/search.png" alt="">
-                <p>黑马旅行><span>搜索结果</span></p>
+                <div class="shaixuan">
+                    <span>线路名称</span>
+                    <input type="text" id="rname">
+                    <span>金额</span>
+                    <input type="text" id="minPrice" oninput="validatePrice(this)" onblur="formatMoney(this)" value="">~<input type="text" id="maxPrice" oninput="validatePrice(this)" onblur="formatMoney(this)" value="">
+                    <button onclick="searchFavoriteRank()">搜索</button>
+                </div>
+<!--                <p>黑马旅行><span>搜索结果</span></p>-->
             </div>
             <div class="xinxi clearfix">
                 <div class="left">

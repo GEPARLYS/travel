@@ -6,60 +6,7 @@ a{
   color:inherit;
 }
 
-.contant .shaixuan {
-    width: 100%;
-    height: 50px;
-    line-height: 50px;
-    background-color: #eee;
-    font-size: 16px;
-    padding: 0 20px;
-    box-sizing: border-box;
-}
-
-.contant .shaixuan input {
-    padding: 0;
-    margin: 0;
-    border: 0;
-    padding: 0 10px;
-    box-sizing: border-box;
-}
-
-.contant .shaixuan>input:nth-of-type(1) {
-    width: 470px;
-    height: 30px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    margin-left: 20px;
-    margin-right: 50px;
-}
-
-.contant .shaixuan>input:nth-of-type(2),
-.contant .shaixuan>input:nth-of-type(3) {
-    width: 72px;
-    height: 30px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    margin-left: 30px;
-    margin-right: 10px;
-}
-
-.contant .shaixuan>input:nth-of-type(3) {
-    margin-left: 10px;
-}
-
-.contant .shaixuan>button {
-    width: 110px;
-    height: 30px;
-    background-color: #ffc900;
-    text-align: center;
-    line-height: 30px;
-    border-radius: 3px;
-    float: right;
-    margin-right: 20px;
-    margin-top: 10px;
-    cursor: pointer;
-}
-
+/*todo*/
 .contant .list {
     padding-bottom: 40px;
 }

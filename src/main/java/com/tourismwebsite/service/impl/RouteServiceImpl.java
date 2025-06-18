@@ -13,7 +13,6 @@ import com.tourismwebsite.service.RouteService;
 import com.tourismwebsite.utils.CalculateUtil;
 import com.tourismwebsite.utils.JedisUtil;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Tuple;
 
 import java.util.*;
@@ -42,11 +41,11 @@ public class RouteServiceImpl implements RouteService {
     }
 
     @Override
-    public PageBean<Route> findByCidPageBean(Long cid, Long currentPage, String keyword) {
+    public PageBean<Route> findByCidPageBean(Long cid, Long currentPage, String keyword, String minPrice, String maxPrice) {
         PageBean<Route> pageBean = new PageBean<>();
         pageBean.setCurrentPage(currentPage);
         Integer pageSize = 10;
-        List<Route> routeList = routeDao.findPageList(cid,currentPage,pageSize,keyword);
+        List<Route> routeList = routeDao.findPageList(cid,currentPage,pageSize,keyword,minPrice,maxPrice);
         pageBean.setList(routeList);
         pageBean.setPageSize(pageSize);
         Long totalSize = routeDao.findCountPage(cid,keyword);
@@ -87,7 +86,7 @@ public class RouteServiceImpl implements RouteService {
         return pageBean;
     }
     @Override
-    public PageBean<Route> findFavoriteRank(Long currentPage, String rname, String minPrice, String maxPrice) {
+    public PageBean<Route> findFavoriteRank(Long currentPage) {
         int page = currentPage == null ? 1 : currentPage.intValue();
         int pageSize = Constant.ROUTE_PAGESIZE;
         int start = (page - 1) * pageSize;

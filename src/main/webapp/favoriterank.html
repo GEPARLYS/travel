@@ -5,17 +5,19 @@
         <title>收藏排行榜</title>
         <link rel="stylesheet" type="text/css" href="css/common.css">
         <link rel="stylesheet" type="text/css" href="css/ranking-list.css">
+        <link rel="stylesheet" type="text/css" href="css/condition-search.css">
         <script src="js/jquery-3.3.1.js"></script>
         <script src="js/getParameter.js"></script>
         <script type="text/javascript">
             var currentPage = getParameter("currentPage");
             //获取rname
-            var rname = getParameter("rname");
-            //获取minPrice
-            var minPrice = getParameter("minPrice");
-            //获取maxPrice
-            var maxPrice = getParameter("maxPrice");
-            $.post("route","action=favoriteRank&currentPage="+currentPage+"&rname="+rname+"&minPrice="+minPrice+"&maxPrice="+maxPrice,function (result) {
+            // var rname = getParameter("rname");
+            // //获取minPrice
+            // var minPrice = getParameter("minPrice");
+            // //获取maxPrice
+            // var maxPrice = getParameter("maxPrice");
+            // $.post("route","action=favoriteRank&currentPage="+currentPage+"&rname="+rname+"&minPrice="+minPrice+"&maxPrice="+maxPrice,function (result) {
+            $.post("route","action=favoriteRank&currentPage="+currentPage,function (result) {
                 var pageBean = result.data;
                 currentPage = pageBean.currentPage
                 var totalPage = pageBean.totalPage;
@@ -94,72 +96,26 @@
                 //页面加载之后，将搜索条件回显到搜索框中
                 //也就是设置搜索框的value值
                 //将rname转换成中文
-                rname = decodeURI(rname)
-                if (rname == null || rname == "null") {
-                    rname = ""
-                }
-                $("#rname").val(rname)
 
-                if (minPrice == null || minPrice == "null") {
-                    minPrice = ""
-                }
-                $("#minPrice").val(minPrice)
-                if (maxPrice == null || maxPrice == "null") {
-                    maxPrice = ""
-                }
-                $("#maxPrice").val(maxPrice)
             },"json")
 
             //搜索的方法
-            function searchFavoriteRank() {
-                //跳转到favoriteRank
-                //搜索的话，还需要携带搜索条件
-                location.href = "favoriterank.html?currentPage=1&rname="+$("#rname").val()+"&minPrice="+$("#minPrice").val()+"&maxPrice="+$("#maxPrice").val()
-            }
+            
 
-
-            function validatePrice(input) {
-                // 只允许输入数字和小数点，并自动去除多余小数点
-                let value = input.value;
-                value = value.replace(/[^\d.]/g, "");    // 只保留数字和.
-                value = value.replace(/^\./g, "");       // 开头不能是.
-                value = value.replace(/\.{2,}/g, ".");   // 连续两个.只保留一个
-                value = value.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".");
-                // 最多两位小数
-                value = value.replace(/^(\d+)\.(\d{0,2}).*$/, '$1.$2');
-                input.value = value;
-            }
-
-
-            function formatMoney(input) {
-                let value = input.value;
-                if (!value) return;
-                // 转成浮点数
-                let num = parseFloat(value);
-                if (isNaN(num)) {
-                    input.value = '';
-                    return;
-                }
-                // 保留两位小数并加千分位
-                input.value = num.toLocaleString('zh-CN', {minimumFractionDigits: 0, maximumFractionDigits: 2});
-            }
-
+            
         </script>
-        
-        
-        
     </head>
     <body>
     <!--引入头部-->
     <div id="header"></div>
         <div class="contant">
-            <div class="shaixuan">
-                <span>线路名称</span>
-                <input type="text" id="rname">
-                <span>金额</span>
-                <input type="text" id="minPrice" oninput="validatePrice(this)" onblur="formatMoney(this)" value="">~<input type="text" id="maxPrice" oninput="validatePrice(this)" onblur="formatMoney(this)" value="">
-                <button onclick="searchFavoriteRank()">搜索</button>
-            </div>
+<!--            <div class="shaixuan">-->
+<!--                <span>线路名称</span>-->
+<!--                <input type="text" id="rname">-->
+<!--                <span>金额</span>-->
+<!--                <input type="text" id="minPrice" oninput="validatePrice(this)" onblur="formatMoney(this)" value="">~<input type="text" id="maxPrice" oninput="validatePrice(this)" onblur="formatMoney(this)" value="">-->
+<!--                <button onclick="searchFavoriteRank()">搜索</button>-->
+<!--            </div>-->
             <div class="list clearfix">
                 <ul id="content">
 

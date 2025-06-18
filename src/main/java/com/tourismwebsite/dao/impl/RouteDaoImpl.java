@@ -233,7 +233,7 @@ public class RouteDaoImpl implements RouteDao {
     }
 
     @Override
-    public List<Route> findPageList(Long cid, Long currentPage, Integer pageSize, String keyword) {
+    public List<Route> findPageList(Long cid, Long currentPage, Integer pageSize, String keyword, String minPrice, String maxPrice) {
         String sql = "select * from tab_route where rflag = 1";
         List<Object> params = new ArrayList<>();
         if (!StringUtils.isEmpty(cid)){
@@ -245,8 +245,17 @@ public class RouteDaoImpl implements RouteDao {
             sql += " and rname like ?";
             params.add("%" + keyword + "%");
         }
+        
+        if (!StringUtil.isEmpty(minPrice)){
+            sql += " and price >= ?";
+            params.add(minPrice);
+        }
 
-
+        if (!StringUtil.isEmpty(maxPrice)){
+            sql += " and price <= ?";
+            params.add(maxPrice);
+        }
+        
         sql += " limit ?,?";
         params.add((currentPage - 1) * pageSize);
         params.add(pageSize);

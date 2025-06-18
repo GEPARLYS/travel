@@ -43,10 +43,10 @@ public class RouteServlet extends BaseServlet {
 
     public ResultInfo getRoutesByCid(HttpServletRequest request, HttpServletResponse response){
         ResultInfo resultInfo = new ResultInfo(true);
-
+        
         Long cid = null;
         if (!StringUtil.isEmpty(request.getParameter("cid"))) {
-         cid = Long.valueOf(request.getParameter("cid"));
+            cid = Long.valueOf(request.getParameter("cid"));
         }
 
         Long currentPage = null;
@@ -55,10 +55,11 @@ public class RouteServlet extends BaseServlet {
         }
 
         String keyword = request.getParameter("keyword");
-
+        String minPrice = request.getParameter("minPrice").replace(",","");
+        String maxPrice = request.getParameter("maxPrice").replace(",","");
 
         try {
-            PageBean<Route> routePageListBean = routeService.findByCidPageBean(cid,currentPage,keyword);
+            PageBean<Route> routePageListBean = routeService.findByCidPageBean(cid,currentPage,keyword,minPrice,maxPrice);
             resultInfo.setData(routePageListBean);
         } catch (Exception e) {
             e.printStackTrace();
@@ -98,13 +99,14 @@ public class RouteServlet extends BaseServlet {
     public ResultInfo favoriteRank(HttpServletRequest request, HttpServletResponse response){
 
         ResultInfo resultInfo = new ResultInfo(true);
-
+//
         Long currentPage = Long.valueOf(request.getParameter("currentPage"));
-        String rname = request.getParameter("rname");
-        String minPrice = request.getParameter("minPrice").replace(",","");
-        String maxPrice = request.getParameter("maxPrice").replace(",","");
+//        String rname = request.getParameter("rname");
+//        String minPrice = request.getParameter("minPrice").replace(",","");
+//        String maxPrice = request.getParameter("maxPrice").replace(",","");
         try {
-            PageBean<Route> pageBean = routeService.findFavoriteRank(currentPage,rname,minPrice,maxPrice);
+//            PageBean<Route> pageBean = routeService.findFavoriteRank2(currentPage,rname,minPrice,maxPrice);
+            PageBean<Route> pageBean = routeService.findFavoriteRank(currentPage);
             resultInfo.setData(pageBean);
         } catch (Exception e) {
             e.printStackTrace();
