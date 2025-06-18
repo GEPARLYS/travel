@@ -13,9 +13,11 @@ public class Constant {
     public static final String ACTIVED = "Y";
     public static final String ALLCATEGORY = "travel_category_all";
     public static final Integer ROUTE_PAGESIZE = 8;
-    public static final String USER_FAVORITE_TOKEY_TEST = "current_user_iffavorite:token:";
+    public static final String ROUT_FAVORITE_RANK_RID = "route:rank";
+    public static final String ROUT_FAVORITE_RANK_DETAIL = "route:rank:data";
     
-    public static final String FAVORITE_RANK = "favorite_rank:";
+    public static final String USER_FAVORITE = "favorite:user:";
+    public static final String USER_FAVORITE_COUNT = "favorite:route:";
     
 
 }

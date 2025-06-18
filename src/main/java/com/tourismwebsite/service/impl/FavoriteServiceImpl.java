@@ -101,7 +101,7 @@ public class FavoriteServiceImpl implements FavoriteService {
                     "else return 0; end";
             
             int expirationTimeInSeconds = 60 * 60 * 24;       
-            List<String> keys = Arrays.asList("favorite:user:" + uid, "favorite:route:" + rid + ":count");
+            List<String> keys = Arrays.asList(Constant.USER_FAVORITE + uid, Constant.USER_FAVORITE_COUNT + rid + ":count");
             List<String> argsList = Arrays.asList(String.valueOf(rid));
             Long result = (Long) jedis.eval(luaScript, keys, argsList);
             if (result == 1L) {
@@ -151,7 +151,7 @@ public class FavoriteServiceImpl implements FavoriteService {
         
         Map<String, Object> resultMap = new HashMap<>();
         try(Jedis jedis = JedisUtil.getJedis()){
-            Set<String> userKeys = jedis.keys("favorite:user:"+uid);
+            Set<String> userKeys = jedis.keys(Constant.USER_FAVORITE+uid);
 
             if (userKeys.isEmpty()){
                 resultMap.put("userIsFavorite", false);
@@ -165,7 +165,7 @@ public class FavoriteServiceImpl implements FavoriteService {
                 }
                 
             }
-            String count = jedis.get("favorite:route:"+rid+":count");
+            String count = jedis.get(Constant.USER_FAVORITE_COUNT+rid+":count");
             resultMap.put("favoriteCount",(count == null || count.isEmpty()) ? 0 : Integer.parseInt(count));
            
             

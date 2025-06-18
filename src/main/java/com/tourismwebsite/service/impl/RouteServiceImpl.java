@@ -10,8 +10,10 @@ import com.tourismwebsite.domain.RouteImg;
 import com.tourismwebsite.domain.User;
 import com.tourismwebsite.factory.BaseFactory;
 import com.tourismwebsite.service.RouteService;
+import com.tourismwebsite.utils.CalculateUtil;
 import com.tourismwebsite.utils.JedisUtil;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Tuple;
 
 import java.util.*;
@@ -87,7 +89,7 @@ public class RouteServiceImpl implements RouteService {
     @Override
     public PageBean<Route> findFavoriteRank(Long currentPage, String rname, String minPrice, String maxPrice) {
         int page = currentPage == null ? 1 : currentPage.intValue();
-        int pageSize = 8;
+        int pageSize = Constant.ROUTE_PAGESIZE;
         int start = (page - 1) * pageSize;
         int stop = start + pageSize - 1;
 
@@ -96,8 +98,8 @@ public class RouteServiceImpl implements RouteService {
         pageBean.setCurrentPage(currentPage);
         
         try(Jedis jedis = JedisUtil.getJedis()) {
-            Set<Tuple> top8 = jedis.zrevrangeWithScores("route:rank", start, stop);
-            if (top8.isEmpty()){
+            Set<Tuple> top10 = jedis.zrevrangeWithScores(Constant.ROUT_FAVORITE_RANK_RID, start, stop);
+            if (top10.isEmpty()){
                 List<Route> routes = queryDbFavoriteRanK();
                 saveRedisFavoriteRank(routes,jedis);
                 List<Route> pageList = routes.stream().skip(start).limit(pageSize).collect(Collectors.toList());//只获取第一页
@@ -106,12 +108,12 @@ public class RouteServiceImpl implements RouteService {
                 pageBean.setTotalPage((long) ((routes.size() + pageSize - 1) / pageSize));
             }else {
                 ObjectMapper mapper = new ObjectMapper();
-                List<String> ids = top8.stream().map(Tuple::getElement).collect(Collectors.toList());
+                List<String> ids = top10.stream().map(Tuple::getElement).collect(Collectors.toList());
 //                List<String> fielids = jedis.hmget("route:rank:data", ids.toArray(new String[0]));
                 List<Route> routes = new ArrayList<>();
 
 //                Set<Tuple> tuples = jedis.zrevrangeWithScores("route:rank", start, stop);
-                List<String> details = jedis.hmget("route:rank:data", top8.stream().map(Tuple::getElement).toArray(String[]::new));
+                List<String> details = jedis.hmget(Constant.ROUT_FAVORITE_RANK_DETAIL, top10.stream().map(Tuple::getElement).toArray(String[]::new));
                 for (int i = 0; i < ids.size(); i++) {
                     String id = ids.get(i);
                     String detailJson = details.get(i);
@@ -120,7 +122,7 @@ public class RouteServiceImpl implements RouteService {
                     routes.add(route);
                     
                 }
-                long count = jedis.zcard("route:rank");
+                long count = jedis.zcard(Constant.ROUT_FAVORITE_RANK_RID);
 
                 pageBean.setList(routes);
                 pageBean.setTotalSize(count);
@@ -159,12 +161,16 @@ public class RouteServiceImpl implements RouteService {
             }
             
         });
+//        Pipeline pipelined = jedis.pipelined();
         //batch storage hash
-        jedis.hmset("route:rank:data",hashMap);
+        jedis.hmset(Constant.ROUT_FAVORITE_RANK_DETAIL,hashMap);
+        jedis.expire(Constant.ROUT_FAVORITE_RANK_DETAIL, CalculateUtil.getExpireSeconds());
         //batch storage zset
         zsetMap.forEach((key,value) -> {
-            jedis.zadd("route:rank",value,key);
+            jedis.zadd(Constant.ROUT_FAVORITE_RANK_RID,value,key);
         });
+        jedis.expire(Constant.ROUT_FAVORITE_RANK_RID,CalculateUtil.getExpireSeconds());
+        
 
 
 
