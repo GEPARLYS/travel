@@ -10,6 +10,8 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 /**
  * @Author j
@@ -33,25 +35,39 @@ public class AutoLoginFilter implements Filter {
             if (user == null){
                 String auto_loginInfo = CookieUtils.getCookieValByKey("auto_login", request);
                 if (auto_loginInfo != null && !auto_loginInfo.equals("")) {
-                    String username = auto_loginInfo.split("_")[0];
-                    String password = auto_loginInfo.split("_")[1];
-                    UserService userService = (UserService) BaseFactory.getInterface("userService");
+                    String decode = URLDecoder.decode(auto_loginInfo, "utf-8");
+                    String[] parts = decode.split("_",2);
+                    if (parts.length == 2){
+                        String username = parts[0];
+                        String token = parts[1];
+                        
+                        UserService userService = (UserService) BaseFactory.getInterface("userService");
+                        
+                        user = userService.findByUsernameAndToken(username,token);
+                        if (user != null){
 
-                    try {
-                        user = userService.doLogin(username, password);
-                        if (user != null) {
-                            request.getSession().setAttribute("user", user);
-                            chain.doFilter(request, response);
-                            return;
+                            try {
+                                user = userService.doLogin(user.getUsername(), user.getPassword());
+                                if (user != null) {
+                                    request.getSession().setAttribute("user", user);
+                                    chain.doFilter(request, response);
+                                    return;
+                                }
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                        
+                      
                     }
+                  
+                   
                 }
+             
             }
 
+           
         }
-
         chain.doFilter(req, resp);
     }
 

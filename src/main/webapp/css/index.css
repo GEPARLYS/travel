@@ -43,6 +43,7 @@
 .jx_tabs li {
 	float: left;
 	height: 35px;
+	
 	position: relative;			
 }
 .jx_tabs li span{
@@ -52,6 +53,18 @@
     border: 1px solid #f0f0f0;
     border-bottom: none;
     transform: skew(-30deg);
+}
+
+.jx_tabs li span a {
+	font-family: "微软雅黑", Arial, sans-serif; /* 更改字体 */
+	font-size: 14px;                            /* 字号 */
+	color: #000000;                             /* 文字颜色 */
+	font-weight: bold;                          /* 加粗 */
+	letter-spacing: 2px;                        /* 字间距 */
+}
+
+.jx_tabs li span a:hover {
+	color: #ff6600;
 }
 .jx_tabs li a{
 	width: 110px;
@@ -70,7 +83,7 @@
 	border:none;
 }
 .jx_tabs .active a{
-	  color: #fff;
+	  color: #0000FF;
 }
 
 

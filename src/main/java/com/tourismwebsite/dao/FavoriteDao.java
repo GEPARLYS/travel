@@ -1,6 +1,7 @@
 package com.tourismwebsite.dao;
 
 import com.tourismwebsite.domain.Favorite;
+import com.tourismwebsite.domain.Param;
 import com.tourismwebsite.domain.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -22,5 +23,7 @@ public interface FavoriteDao {
     Long findMyFavoriteCount(User user);
 
     List<Favorite> findMyFavoritePageList(User user, Long currentPage, int pageSize) throws InvocationTargetException, IllegalAccessException;
+
+    int batchAddFavorite(String currentDate,JdbcTemplate jdbcTemplate,List<Param> paramList);
 
 }

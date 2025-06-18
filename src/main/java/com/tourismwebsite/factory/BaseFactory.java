@@ -19,8 +19,8 @@ public class BaseFactory {
         try {
             Document read = reader.read(resourceAsStream);
             Element element = (Element) read.selectSingleNode("//context[@id='" + id + "']");
-            String className = element.getTextTrim();
-            Class<?> aClass = Class.forName(className);
+            String referenceName = element.getTextTrim();
+            Class<?> aClass = Class.forName(referenceName);
             return  aClass.newInstance();
         } catch (Exception e) {
             e.printStackTrace();

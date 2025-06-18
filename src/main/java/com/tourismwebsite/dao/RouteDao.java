@@ -5,6 +5,7 @@ import com.tourismwebsite.domain.RouteImg;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author j
@@ -35,4 +36,9 @@ public interface RouteDao {
     Long findFavoriteCount(String rname, String maxPrice, String minPrice);
 
     List<Route> findFavoriteRankPageList(int pageSize, Long currentPage, String rname, String minPrice, String maxPrice);
+
+    void batchUpdateRouteCountNumber(Map<Integer, Integer> parameters2, JdbcTemplate jdbcTemplate);
+
+    List<Route> findFavoriteRankCount();
+    
 }

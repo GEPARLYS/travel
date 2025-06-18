@@ -16,6 +16,8 @@ public class User implements Serializable {
     private String email;//邮箱
     private String status;//激活状态，Y代表激活，N代表未激活
     private String code;//激活码（要求唯一）
+    
+    private String token; //cookie 存储
 
     /**
      * 无参构造方法
@@ -36,7 +38,7 @@ public class User implements Serializable {
      * @param status
      * @param code
      */
-    public User(int uid, String username, String password, String name, String birthday, String sex, String telephone, String email, String status, String code) {
+    public User(int uid, String username, String password, String name, String birthday, String sex, String telephone, String email, String status, String code, String token) {
         this.uid = uid;
         this.username = username;
         this.password = password;
@@ -47,6 +49,7 @@ public class User implements Serializable {
         this.email = email;
         this.status = status;
         this.code = code;
+        this.token = token;
     }
 
     public int getUid() {
@@ -127,5 +130,13 @@ public class User implements Serializable {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String code) {
+        this.token = token;
     }
 }

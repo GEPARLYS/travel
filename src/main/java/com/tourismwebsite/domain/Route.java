@@ -191,4 +191,27 @@ public class Route implements Serializable {
     public void setTokenCode(String tokenCode) {
         this.tokenCode = tokenCode;
     }
+
+
+    @Override
+    public String toString() {
+        return "Route{" +
+                "rid=" + rid +
+                ", rname='" + rname + '\'' +
+                ", price=" + price +
+                ", routeIntroduce='" + routeIntroduce + '\'' +
+                ", rflag='" + rflag + '\'' +
+                ", rdate='" + rdate + '\'' +
+                ", isThemeTour='" + isThemeTour + '\'' +
+                ", count=" + count +
+                ", cid=" + cid +
+                ", rimage='" + rimage + '\'' +
+                ", sid=" + sid +
+                ", sourceId='" + sourceId + '\'' +
+                ", category=" + category +
+                ", seller=" + seller +
+                ", routeImgList=" + routeImgList +
+                ", tokenCode='" + tokenCode + '\'' +
+                '}';
+    }
 }

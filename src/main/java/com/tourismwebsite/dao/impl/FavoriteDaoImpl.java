@@ -2,14 +2,20 @@ package com.tourismwebsite.dao.impl;
 
 import com.tourismwebsite.dao.FavoriteDao;
 import com.tourismwebsite.domain.Favorite;
+import com.tourismwebsite.domain.Param;
 import com.tourismwebsite.domain.Route;
 import com.tourismwebsite.domain.User;
 import com.tourismwebsite.utils.JDBCUtil;
 import org.apache.commons.beanutils.BeanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.lang.reflect.InvocationTargetException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +26,8 @@ import java.util.Map;
  * @Version 1.0
  */
 public class FavoriteDaoImpl implements FavoriteDao {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FavoriteDao.class);
+
     private JdbcTemplate jdbcTemplate = new JdbcTemplate(JDBCUtil.getDataSource());
     @Override
     public int addFavorite(Long rid, String currentDate, int uid, JdbcTemplate jdbcTemplate) {
@@ -30,6 +38,7 @@ public class FavoriteDaoImpl implements FavoriteDao {
         } catch (DataAccessException e) {
             e.printStackTrace();
         }
+        
         return update;
     }
 
@@ -91,5 +100,34 @@ public class FavoriteDaoImpl implements FavoriteDao {
 
         }
         return favoriteList;
+    }
+
+    
+    @Override
+    public int batchAddFavorite(String currentDate, JdbcTemplate jdbcTemplate, List<Param> paramList) {
+
+        int[] ints = new int[0];
+        try {
+            String sql = "insert ignore into tab_favorite (rid,date,uid) values(?,?,?)";
+            ints = jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    Param param = paramList.get(i);
+                    ps.setInt(1, param.getRouteId());
+                    ps.setString(2, currentDate);
+                    ps.setInt(3, param.getUserId());
+                }
+    
+                @Override
+                public int getBatchSize() {
+                    return paramList.size();
+                }
+            });
+        } catch (DataAccessException e) {
+            LOGGER.warn("插入用户时异常: {}",e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+        return ints.length;
     }
 }

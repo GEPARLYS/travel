@@ -66,5 +66,27 @@ public class UserDaoImpl implements UserDao {
         return user;
     }
 
+    @Override
+    public void saveToken(String token,User findUser) {
+        String sql = "update tab_user set token = ? where uid = ?";
+        template.update(sql,token,findUser.getUid());
+
+    }
+
+    @Override
+    public User findByUsernameAndToken(String username, String token) {
+
+
+        String sql = "select * from tab_user where username = ? and token = ?";
+        User user = null;
+        try {
+            user = template.queryForObject(sql, new BeanPropertyRowMapper<>(User.class), username,token);
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+        }
+        return user;
+        
+    }
+
 
 }

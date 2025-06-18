@@ -99,7 +99,14 @@
                     rname = ""
                 }
                 $("#rname").val(rname)
+
+                if (minPrice == null || minPrice == "null") {
+                    minPrice = ""
+                }
                 $("#minPrice").val(minPrice)
+                if (maxPrice == null || maxPrice == "null") {
+                    maxPrice = ""
+                }
                 $("#maxPrice").val(maxPrice)
             },"json")
 
@@ -110,7 +117,37 @@
                 location.href = "favoriterank.html?currentPage=1&rname="+$("#rname").val()+"&minPrice="+$("#minPrice").val()+"&maxPrice="+$("#maxPrice").val()
             }
 
+
+            function validatePrice(input) {
+                // 只允许输入数字和小数点，并自动去除多余小数点
+                let value = input.value;
+                value = value.replace(/[^\d.]/g, "");    // 只保留数字和.
+                value = value.replace(/^\./g, "");       // 开头不能是.
+                value = value.replace(/\.{2,}/g, ".");   // 连续两个.只保留一个
+                value = value.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".");
+                // 最多两位小数
+                value = value.replace(/^(\d+)\.(\d{0,2}).*$/, '$1.$2');
+                input.value = value;
+            }
+
+
+            function formatMoney(input) {
+                let value = input.value;
+                if (!value) return;
+                // 转成浮点数
+                let num = parseFloat(value);
+                if (isNaN(num)) {
+                    input.value = '';
+                    return;
+                }
+                // 保留两位小数并加千分位
+                input.value = num.toLocaleString('zh-CN', {minimumFractionDigits: 0, maximumFractionDigits: 2});
+            }
+
         </script>
+        
+        
+        
     </head>
     <body>
     <!--引入头部-->
@@ -120,7 +157,7 @@
                 <span>线路名称</span>
                 <input type="text" id="rname">
                 <span>金额</span>
-                <input type="text" id="minPrice" value="">~<input type="text" id="maxPrice" value="">
+                <input type="text" id="minPrice" oninput="validatePrice(this)" onblur="formatMoney(this)" value="">~<input type="text" id="maxPrice" oninput="validatePrice(this)" onblur="formatMoney(this)" value="">
                 <button onclick="searchFavoriteRank()">搜索</button>
             </div>
             <div class="list clearfix">

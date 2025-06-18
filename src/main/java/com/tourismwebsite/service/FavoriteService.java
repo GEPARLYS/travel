@@ -15,11 +15,12 @@ import java.util.Map;
  * @Version 1.0
  */
 public interface FavoriteService {
-    int addFavorite(Long rid, String testToken, int uid) throws SQLException;
+    int addFavorite(Long rid, int uid) throws SQLException;
 
     Map<String,Object> findIsFavorite(int uid, Long rid);
 
-    int cancelFavorite(int uid, Long rid, String testToken) throws SQLException;
+    int cancelFavorite(int uid, Long rid) throws SQLException;
 
     PageBean<Favorite> findMyFavorite(Long currentPage, User user) throws InvocationTargetException, IllegalAccessException;
+
 }

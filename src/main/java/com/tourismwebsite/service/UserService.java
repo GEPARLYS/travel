@@ -19,4 +19,8 @@ public interface UserService {
 
     User doLogin(String username,String password) throws Exception;
 
+    void saveToken(String token,User findUser);
+
+    User findByUsernameAndToken(String username, String token);
+    
 }

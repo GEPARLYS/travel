@@ -17,4 +17,7 @@ public interface UserDao {
 
     User findCodeByUser(String code);
 
+    void saveToken(String token,User findUser);
+
+    User findByUsernameAndToken(String username, String token);
 }

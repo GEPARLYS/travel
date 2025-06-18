@@ -27,30 +27,27 @@ public class FavoriteServlet extends BaseServlet {
     private FavoriteService favoriteService = (FavoriteService) BaseFactory.getInterface("favoriteService");
     private RouteService routeService = (RouteService) BaseFactory.getInterface("routeService");
     public ResultInfo addFavorite(HttpServletRequest request, HttpServletResponse response){
-
-        String testToken = request.getParameter("testToken");
-
+        
         ResultInfo resultInfo = new ResultInfo(true);
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         if (user == null){
             resultInfo.setData(-1);
-            resultInfo.setFlag(false);
         }else{
             Long rid = Long.valueOf(request.getParameter("rid"));
             try {
-                int countFavorite = favoriteService.addFavorite(rid,testToken,user.getUid());
+                int countFavorite = favoriteService.addFavorite(rid,user.getUid());
                 resultInfo.setData(countFavorite);
             } catch (Exception e) {
                 e.printStackTrace();
                 resultInfo.setFlag(false);
+                resultInfo.setData(null);
             }
         }
         return resultInfo;
     }
 
     public ResultInfo cancelFavorite(HttpServletRequest request, HttpServletResponse response){
-        String testToken = request.getParameter("testToken");
         ResultInfo resultInfo = new ResultInfo(true);
         HttpSession session = request.getSession();
         Long rid = null;
@@ -58,14 +55,19 @@ public class FavoriteServlet extends BaseServlet {
              rid = Long.valueOf(request.getParameter("rid"));
         }
         User user = (User) session.getAttribute("user");
-        try {
-            int count = favoriteService.cancelFavorite(user.getUid(),rid,testToken);
-            resultInfo.setData(count);
-        } catch (Exception e) {
-            e.printStackTrace();
-            resultInfo.setData(-1);
-            resultInfo.setFlag(false);
+        if (user == null){
+           resultInfo.setData(-1);
+        }else {
+            try {
+                int count = favoriteService.cancelFavorite(user.getUid(),rid);
+                resultInfo.setData(count);
+            } catch (Exception e) {
+                e.printStackTrace();
+                resultInfo.setData(null);
+                resultInfo.setFlag(false);
+            }
         }
+       
         return resultInfo;
     }
 
@@ -77,7 +79,6 @@ public class FavoriteServlet extends BaseServlet {
         if (user == null){
             resultInfo.setFlag(false);
             HashMap<String, Object> resultMap = new HashMap<>();
-            resultMap.put("token",UUID.randomUUID().toString().replace("-", ""));
             int count = routeService.findRouteCountByRid(rid);
             resultMap.put("userIsFavorite",false);
             resultMap.put("favoriteCount",count);
@@ -97,7 +98,6 @@ public class FavoriteServlet extends BaseServlet {
             resultInfo.setFlag(userIsFavorite);
             resultInfo.setData(map);
         }
-
 
         return resultInfo;
     }

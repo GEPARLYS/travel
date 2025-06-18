@@ -17,8 +17,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @Author j
@@ -123,7 +125,12 @@ public class UserServlet extends BaseServlet {
                     session.setAttribute("user",findUser);
                     resultInfo.setData(true);
                     if (parameterMap.containsKey("auto_login")){
-                        Cookie cookie = new Cookie("auto_login", findUser.getUsername() + "_" + findUser.getPassword());
+                        String token = UUID.randomUUID().toString();
+                        userService.saveToken(token,findUser);
+                        
+                        String cookieValue = findUser.getUsername() + "_" + token;
+                        cookieValue = URLEncoder.encode(cookieValue,"UTF-8");
+                        Cookie cookie = new Cookie("auto_login",cookieValue );
                         cookie.setMaxAge(60 * 60 * 24 * 7);
                         cookie.setPath(request.getContextPath() + "/");
                         response.addCookie(cookie);
@@ -148,7 +155,6 @@ public class UserServlet extends BaseServlet {
             resultInfo.setErrorMsg(e.getMessage());
         }
 
-
         return resultInfo;
     }
     public ResultInfo getUserInfo(HttpServletRequest request, HttpServletResponse response){
@@ -171,7 +177,7 @@ public class UserServlet extends BaseServlet {
         for (Cookie cookie : cookies) {
             if (cookie.getName().contains("auto_login")){
                 cookie.setMaxAge(0);
-                cookie.setPath("/");
+                cookie.setPath(request.getContextPath() +"/");
                 response.addCookie(cookie);
             }
         }
@@ -181,6 +187,7 @@ public class UserServlet extends BaseServlet {
 
 
     }
+
 
 }
 

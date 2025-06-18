@@ -54,6 +54,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User doLogin(String username,String password) throws Exception {
+        
         User findUser = userDao.findUsername(username);
 
         if (findUser == null){
@@ -68,5 +69,16 @@ public class UserServiceImpl implements UserService {
             throw new NotActiveException("account not active !!!");
         }
         return findUser;
+    }
+
+    @Override
+    public void saveToken(String token,User findUser) {
+        userDao.saveToken(token,findUser);
+    }
+
+    @Override
+    public User findByUsernameAndToken(String username, String token) {
+        
+        return userDao.findByUsernameAndToken(username,token);
     }
 }

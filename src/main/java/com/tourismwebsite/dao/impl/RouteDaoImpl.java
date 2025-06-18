@@ -9,11 +9,14 @@ import com.tourismwebsite.utils.JDBCUtil;
 import com.tourismwebsite.utils.StringUtil;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.InvocationTargetException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -200,6 +203,33 @@ public class RouteDaoImpl implements RouteDao {
             e.printStackTrace();
         }
         return routeList;
+    }
+
+    @Override
+    public void batchUpdateRouteCountNumber(Map<Integer, Integer> parameters2, JdbcTemplate jdbcTemplate) {
+        
+        String sql = "update tab_route set count = ? where rid = ?";
+        List<Map.Entry<Integer, Integer>> entryList = new ArrayList<>(parameters2.entrySet());
+        int[] ints = jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                Map.Entry<Integer, Integer> entry = entryList.get(i);
+                ps.setInt(1, entry.getValue());
+                ps.setInt(2, entry.getKey());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return entryList.size();
+            }
+        });
+    }
+
+    @Override
+    public List<Route> findFavoriteRankCount() {
+        String sql = "select * from tab_route where rflag = 1 order by count desc limit 0,100";
+        
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Route.class));
     }
 
     @Override

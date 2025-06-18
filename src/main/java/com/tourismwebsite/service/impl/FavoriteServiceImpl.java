@@ -11,141 +11,177 @@ import com.tourismwebsite.service.FavoriteService;
 import com.tourismwebsite.utils.DateUtil;
 import com.tourismwebsite.utils.JDBCUtil;
 import com.tourismwebsite.utils.JedisUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import redis.clients.jedis.Jedis;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Author j
  * @Date 2023/8/26 16:15
  * @Version 1.0
  */
+@Service
 public class FavoriteServiceImpl implements FavoriteService {
     private FavoriteDao favoriteDao = (FavoriteDao) BaseFactory.getInterface("favoriteDao");
     private RouteDao routeDao = (RouteDao) BaseFactory.getInterface("routeDao");
 
+
+
+
     @Override
-    public int addFavorite(Long rid, String testToken, int uid) throws SQLException {
+    public int addFavorite(Long rid, int uid) throws SQLException {
         int count = 0;
-        Connection connection = null;
-        Jedis jedis = null;
-        try {
-            jedis = JedisUtil.getJedis();
-            String lua_Script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
-            Long result = (Long) jedis.evalsha(jedis.scriptLoad(lua_Script), Collections.singletonList(Constant.USER_FAVORITE_TOKEY_TEST + uid), Collections.singletonList(testToken));
+        try (Jedis jedis = JedisUtil.getJedis();){
+            String luaScript = "if redis.call('SADD', KEYS[1], ARGV[1]) == 1 then " +
+                    "redis.call('INCR', KEYS[2]); return 1; " +
+                    "else return 0; end";
+            
+            List<String> keys = Arrays.asList("favorite:user:" + uid, "favorite:route:" + rid + ":count");
+            List<String> argsList = Arrays.asList(String.valueOf(rid));
 
-        if (result == 0L){
-          count = -2;
-        }else {
-            DataSource dataSource = JDBCUtil.getDataSource();
-            JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-            TransactionSynchronizationManager.initSynchronization();//开启事务管理器
-            connection = DataSourceUtils.getConnection(dataSource);//ThreadLocal 保证jdbcTemplate 和 connection 使用同一个连接,线程共享对象
-            connection.setAutoCommit(false);
+            Long result = (Long) jedis.eval(luaScript, keys, argsList);
+            if (result == 1L) {
 
-            favoriteDao.addFavorite(rid, DateUtil.getCurrentDate(), uid, jdbcTemplate);
-            routeDao.updateRouteAddCount(rid, jdbcTemplate);
-            connection.commit();
-        }
-        } catch (Exception e) {
-                e.printStackTrace();
-                if (connection != null){
-                    connection.rollback();
-                }
-            }finally {
-                //恢复自动提交事务,释放当前线程与连接对象的绑定
-                TransactionSynchronizationManager.clearSynchronization();
-                if (connection != null){
-                    connection.setAutoCommit(true);
-                }
-                if (jedis != null){
-                    JedisUtil.close(jedis);
-                }
-
-
-            }
-
-//            count = routeDao.findRouteCountByRid(rid);
-
-        return  count;
-    }
-
-    @Override
-    public Map<String,Object> findIsFavorite(int uid, Long rid) {
-
-        int userIsFavorite = favoriteDao.findIsFavorite(uid,rid);
-
-        Map<String, Object> resultMap = new HashMap<>();
-
-        String token = UUID.randomUUID().toString().replace("-", "");
-        Jedis jedis = JedisUtil.getJedis();
-
-
-        jedis.set(Constant.USER_FAVORITE_TOKEY_TEST + uid,token,"NX","EX",60 * 30);
-        String reidToken = jedis.get(Constant.USER_FAVORITE_TOKEY_TEST + uid);
-
-        int count = routeDao.findRouteCountByRid(rid);
-
-        resultMap.put("token",reidToken);
-        resultMap.put("userIsFavorite",userIsFavorite > 0);
-        resultMap.put("favoriteCount",count);
-
-        return resultMap;
-    }
-
-    @Override
-    public int cancelFavorite(int uid, Long rid, String testToken) throws SQLException {
-
-        Connection connection = null;
-        Jedis jedis = null;
-
-        int count = 0;
-        try {
-            jedis = JedisUtil.getJedis();
-            String lua_Script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
-            Long result = (Long) jedis.evalsha(jedis.scriptLoad(lua_Script), Collections.singletonList(Constant.USER_FAVORITE_TOKEY_TEST + uid), Collections.singletonList(testToken));
-
-            if (result == 0L){
-                count = -1;
-            }else {
-
-                DataSource dataSource = JDBCUtil.getDataSource();
-                JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-                TransactionSynchronizationManager.initSynchronization();
-                connection = DataSourceUtils.getConnection(dataSource);
-                connection.setAutoCommit(false);
-                favoriteDao.delFavorite(rid,uid,jdbcTemplate);
-                routeDao.updateRouteMinusCount(rid,jdbcTemplate);
-                connection.commit();
-            }
+//                DataSource dataSource = JDBCUtil.getDataSource();
+//                JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+//                TransactionTemplate transactionTemplate = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
+//                transactionTemplate.execute(start -> {
+//                    favoriteDao.addFavorite(rid, DateUtil.getCurrentDate(), uid, jdbcTemplate);
+//                    routeDao.updateRouteAddCount(rid, jdbcTemplate);
+//                    return null;
+//                });
+                count = 1;
+              
+            } 
+               
+             /*   String token = UUID.randomUUID().toString().replace("-", "");
+                jedis.set(Constant.USER_FAVORITE_TOKEY_TEST + uid, token, "NX", "EX", 60 * 30);*/
+                
+//            TransactionSynchronizationManager.initSynchronization();//开启事务管理器
+//            connection = DataSourceUtils.getConnection(dataSource);//ThreadLocal 保证jdbcTemplate 和 connection 使用同一个连接,线程共享对象
+//            connection.setAutoCommit(false);
+//
+//            favoriteDao.addFavorite(rid, DateUtil.getCurrentDate(), uid, jdbcTemplate);
+//            routeDao.updateRouteAddCount(rid, jdbcTemplate);
+//            connection.commit();
 
         } catch (Exception e) {
-           if ( connection != null){
-               connection.rollback();
-           }
             e.printStackTrace();
-        }finally {
-            TransactionSynchronizationManager.clearSynchronization(); /*恢复自动提交事务,释放当前线程和对象的绑定*/
-           if ( connection != null){
-               connection.setAutoCommit(true);
-           }
-           if (jedis != null){
-               JedisUtil.close(jedis);
-           }
-
+//                if (connection != null){
+//                    connection.rollback();
+//                }
+           
         }
-
-
 
         return count;
     }
+
+    @Override
+    public int cancelFavorite(int uid, Long rid) {
+        int count = 0;
+        try(Jedis jedis = JedisUtil.getJedis()) {
+            //        Connection connection = null;
+         
+            String luaScript = "if redis.call('SREM', KEYS[1], ARGV[1]) == 1 then " +
+                    "redis.call('DECR', KEYS[2]); return 1;" +
+                    "else return 0; end";
+            
+            int expirationTimeInSeconds = 60 * 60 * 24;       
+            List<String> keys = Arrays.asList("favorite:user:" + uid, "favorite:route:" + rid + ":count");
+            List<String> argsList = Arrays.asList(String.valueOf(rid));
+            Long result = (Long) jedis.eval(luaScript, keys, argsList);
+            if (result == 1L) {
+                
+                
+/*
+                DataSource dataSource = JDBCUtil.getDataSource();
+                JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+                *//*Long del = jedis.del(Constant.USER_FAVORITE_TOKEY_TEST + uid);*//*
+
+                TransactionTemplate transactionTemplate = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
+                transactionTemplate.execute(status -> {
+                    favoriteDao.delFavorite(rid, uid, jdbcTemplate);
+                    routeDao.updateRouteMinusCount(rid, jdbcTemplate);
+                    return null;
+                });*/
+                
+                count = 1;
+            } 
+
+
+             
+//                TransactionSynchronizationManager.initSynchronization();
+//                connection = DataSourceUtils.getConnection(dataSource);
+//                connection.setAutoCommit(false);
+//                favoriteDao.delFavorite(rid,uid,jdbcTemplate);
+//                routeDao.updateRouteMinusCount(rid,jdbcTemplate);
+//                connection.commit();
+        } catch (Exception e) {
+//            if ( connection != null){
+//                connection.rollback();
+//            }
+            e.printStackTrace();
+        } finally {
+//            TransactionSynchronizationManager.clearSynchronization(); /*恢复自动提交事务,释放当前线程和对象的绑定*/
+//            if ( connection != null){
+//                connection.setAutoCommit(true);
+//            }
+        }
+
+        return count;
+    }
+
+
+    @Override
+    public Map<String, Object> findIsFavorite(int uid, Long rid) {
+        
+        Map<String, Object> resultMap = new HashMap<>();
+        try(Jedis jedis = JedisUtil.getJedis()){
+            Set<String> userKeys = jedis.keys("favorite:user:"+uid);
+
+            if (userKeys.isEmpty()){
+                resultMap.put("userIsFavorite", false);
+               
+            }else {
+                for (String userKey : userKeys) {
+                    Set<String> rids = jedis.smembers(userKey);
+                    Set<Long> collect = rids.stream().map(Long::valueOf).collect(Collectors.toSet());
+                    boolean contains = collect.contains(rid);
+                    resultMap.put("userIsFavorite", contains);
+                }
+                
+            }
+            String count = jedis.get("favorite:route:"+rid+":count");
+            resultMap.put("favoriteCount",(count == null || count.isEmpty()) ? 0 : Integer.parseInt(count));
+           
+            
+        }
+        return resultMap;
+    }
+    
+    private int findDbIsFavorite(int uid, Long rid){
+        
+        return favoriteDao.findIsFavorite(uid, rid);
+    }
+    
+    private int findDaRouteCount(Long rid){
+        return routeDao.findRouteCountByRid(rid);
+    }
+
 
     @Override
     public PageBean<Favorite> findMyFavorite(Long currentPage, User user) throws InvocationTargetException, IllegalAccessException {
@@ -155,8 +191,9 @@ public class FavoriteServiceImpl implements FavoriteService {
         Long totalSize = favoriteDao.findMyFavoriteCount(user);
         favoritePageBean.setTotalSize(totalSize);
 
-        List<Favorite> favoriteList = favoriteDao.findMyFavoritePageList(user,currentPage,pageSize);
+        List<Favorite> favoriteList = favoriteDao.findMyFavoritePageList(user, currentPage, pageSize);
         favoritePageBean.setList(favoriteList);
         return favoritePageBean;
     }
+
 }

@@ -5,6 +5,7 @@ import com.tourismwebsite.domain.ResultInfo;
 import com.tourismwebsite.domain.Route;
 import com.tourismwebsite.domain.User;
 import com.tourismwebsite.factory.BaseFactory;
+import com.tourismwebsite.service.FavoriteService;
 import com.tourismwebsite.service.RouteService;
 import com.tourismwebsite.utils.StringUtil;
 import org.springframework.util.StringUtils;
@@ -77,6 +78,7 @@ public class RouteServlet extends BaseServlet {
         Route route = null;
 
         if (user != null){
+            
             route = routeService.findRouteByRid(rid,user);
         }else {
 
@@ -99,8 +101,8 @@ public class RouteServlet extends BaseServlet {
 
         Long currentPage = Long.valueOf(request.getParameter("currentPage"));
         String rname = request.getParameter("rname");
-        String minPrice = request.getParameter("minPrice");
-        String maxPrice = request.getParameter("maxPrice");
+        String minPrice = request.getParameter("minPrice").replace(",","");
+        String maxPrice = request.getParameter("maxPrice").replace(",","");
         try {
             PageBean<Route> pageBean = routeService.findFavoriteRank(currentPage,rname,minPrice,maxPrice);
             resultInfo.setData(pageBean);

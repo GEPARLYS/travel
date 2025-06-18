@@ -12,26 +12,47 @@ import java.util.ResourceBundle;
  * 日期2018-09-10  17:41
  */
 public class JedisUtil {
-    private static JedisPool pool;
+    private static JedisPool jedisPool = null;
+
     static {
         JedisPoolConfig config = new JedisPoolConfig();
-        //配置连接池
-        //获取properties配置文件中的信息
-        ResourceBundle bundle = ResourceBundle.getBundle("jedisconfig");
-        Integer maxTotal = Integer.parseInt(bundle.getString("maxTotal"));
-        Integer maxIdle = Integer.parseInt(bundle.getString("maxIdle"));
-        config.setMaxTotal(maxTotal);//最大连接数
-        config.setMaxIdle(maxIdle);//最大闲置连接数
+        config.setMaxTotal(50);
+        config.setMaxIdle(10);
+        config.setMinIdle(5);
+        config.setMaxWaitMillis(5000);
+        config.setTestOnBorrow(true);  // 获取连接时校验
+        config.setTestOnReturn(true); // 归还时校验
+        // 可以根据需要配置其它参数，比如testWhileIdle等
 
-        String host = bundle.getString("host");
-        Integer port = Integer.parseInt(bundle.getString("port"));
-        pool = new JedisPool(config,host,port);
+        // 如果有密码
+        String host = "localhost";
+        int port = 6379;
+        int timeout = 2000;
+        String password = null; // "yourpassword"; // 没密码可不写
+
+        if (password != null && !"".equals(password)) {
+            jedisPool = new JedisPool(config, host, port, timeout, password);
+        } else {
+
+        }
+
+        jedisPool = new JedisPool(config, host, port, timeout);
+       
+
     }
-    public static Jedis getJedis(){
-        Jedis jedis = pool.getResource();
-        return jedis;
+
+    public static Jedis getJedis() {
+        
+        return jedisPool.getResource();
     }
-    public static void close(Jedis jedis){
-        jedis.close();
+
+    public static void close(Jedis jedis) {
+        if (jedis != null) {
+            try {
+                jedis.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -44,7 +44,7 @@ public final class MailUtil {
 	 * 测试类
 	 */
 	public static void main(String[] args) throws Exception{
-		String toEmail = "563601782@qq.com";
+		String toEmail = "847423815@qq.com";
 		sendMail(toEmail,"Welcome 奥巴马 Register TourismWebsite，点击以下连接<a href='http://localhost:8080/user?action=active&code="+UuidUtil.getUuid()+"'>激活</a>");
 		System.out.println("发送成功。。。");
 	}

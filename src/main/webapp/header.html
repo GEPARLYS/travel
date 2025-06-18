@@ -1,10 +1,13 @@
 <!-- 头部 start -->
 <header id="header">
+    <link rel="shortcut icon" href="images/icon_2.jpg"/>
     <div class="top_banner">
         <img src="images/top_banner.jpg" alt="">
     </div>
     <script src="js/getParameter.js"></script>
     <div class="shortcut">
+        
+
         <script>
             /**
              * 退出登录
@@ -52,16 +55,64 @@
                 $(".nav").append("<li><a href='favoriterank.html?currentPage=1'>收藏排行榜</a></li>")
 
 
+
+                // 添加点击事件处理
+                $(".nav li a").click(function() {
+                    // 移除所有li的active类
+                    $(".nav li").removeClass("active");
+                    // 给当前点击的li添加active类
+                    $(this).parent().addClass("active");
+                });
             },"json");
+
 
             function searchRoute(){
                 var cid = getParameter("cid");
                 location.href = "route_list.html?currentPage=1&cid="+cid+"&keyword="+$("#keyword").val();
             }
+
+
+            var keyword = getParameter("keyword");
+            if (keyword) {
+                $("#keyword").val(decodeURIComponent(keyword)); // jQuery版，或 document.getElementById('keyword').value = keyword;
+            }
+
+            // 高亮当前页面对应的导航项
+            function highlightActiveNav() {
+                var currentUrl = window.location.pathname;
+                var searchParams = new URLSearchParams(window.location.search);
+                var cid = searchParams.get('cid');
+
+                $(".nav li").removeClass("active");
+
+                if (currentUrl.includes("route_list.html") && cid) {
+                    $(".nav li").each(function() {
+                        var link = $(this).find("a").attr("href");
+                        if (link && link.includes("cid=" + cid)) {
+                            $(this).addClass("active");
+                        }
+                    });
+                } else if (currentUrl.includes("favoriterank.html")) {
+                    $(".nav li a[href*='favoriterank.html']").parent().addClass("active");
+                } else if (currentUrl.includes("index.html") || currentUrl === "/") {
+                    $(".nav li:first-child").addClass("active");
+                }
+            }
+            
+
+/*
+            function searchRoute(){
+                var cid = getParameter("cid");
+                location.href = "route_list.html?currentPage=1&cid="+cid+"&keyword="+$("#keyword").val();
+            }
+*/
+
+
+          
+
         </script>
         <!-- 未登录状态  -->
-
-
+    
 
         <!-- 登录状态  -->
 
@@ -72,7 +123,7 @@
                 <a href="/"><img src="images/logo.jpg" alt=""></a>
             </div>
             <div class="search">
-                <input name="" type="text" id="keyword" placeholder="请输入路线名称" class="search_input" autocomplete="off">
+                <input name="" type="text" id="keyword" placeholder="请输入路线名称" class="search_input" value="" autocomplete="off">
                 <a href="javascript:;" class="search-button" onclick="searchRoute()">搜索</a>
             </div>
             <div class="hottel">
@@ -88,10 +139,10 @@
     </div>
 </header>
 <!-- 头部 end -->
+
 <!-- 首页导航 -->
 <div class="navitem">
     <ul class="nav">
         <li class="nav-active"><a href="index.html">首页</a></li>
     </ul>
 </div>
-    
