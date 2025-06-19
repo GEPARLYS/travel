@@ -41,14 +41,14 @@ public class RouteServiceImpl implements RouteService {
     }
 
     @Override
-    public PageBean<Route> findByCidPageBean(Long cid, Long currentPage, String keyword, String minPrice, String maxPrice) {
+    public PageBean<Route> findByCidPageBean(Long cid, Long currentPage, String keyword, String rname, String minPrice, String maxPrice) {
         PageBean<Route> pageBean = new PageBean<>();
         pageBean.setCurrentPage(currentPage);
         Integer pageSize = 10;
-        List<Route> routeList = routeDao.findPageList(cid,currentPage,pageSize,keyword,minPrice,maxPrice);
+        List<Route> routeList = routeDao.findPageList(cid,currentPage,pageSize,keyword,rname,minPrice,maxPrice);
         pageBean.setList(routeList);
         pageBean.setPageSize(pageSize);
-        Long totalSize = routeDao.findCountPage(cid,keyword);
+        Long totalSize = routeDao.findCountPage(cid,keyword,rname,minPrice,maxPrice);
         pageBean.setTotalSize(totalSize);
 
         pageBean.setTotalPage(totalSize / pageSize == 0 ? (totalSize / pageSize) : (totalSize / pageSize) + 1);

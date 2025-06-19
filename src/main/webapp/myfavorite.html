@@ -20,9 +20,11 @@
     <script type="text/javascript">
         var currentPage = getParameter("currentPage");
         $.post("favorite","action=findMyFavorite&currentPage="+currentPage,function (result) {
+            
             var pageBean = result.data;
-            var totalPage = pageBean.totalPage;
 
+            var totalPage = pageBean.totalPage;
+           
             var totalSize = pageBean.totalSize;
 
             currentPage = pageBean.currentPage;
@@ -67,8 +69,10 @@
                 }
                 //中间拼接页码
                 for(var i=begin;i<=end;i++){
+                   
                     //判断，如果i=当前页数，那么该页高亮显示
                     if (i == currentPage) {
+                        console.log(i)
                         $(".pageNum ul").append("<li style='background-color: orange'><a href=\"javascript:;\">"+i+"</a></li>")
                     }else {
                         $(".pageNum ul").append("<li><a href=\"myfavorite.html?currentPage="+i+"\">"+i+"</a></li>")

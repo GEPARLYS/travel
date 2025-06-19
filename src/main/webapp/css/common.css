@@ -223,9 +223,9 @@ h1, h2, h3, h4, h5, h6 {
     background: none;
 }
 
-.nav .nav-active {
-    background-color: #ffd800;
-}
+/*.nav .nav-active {*/
+/*    background-color: #ffd800;*/
+/*}*/
 
 
 .nav>li>a {   

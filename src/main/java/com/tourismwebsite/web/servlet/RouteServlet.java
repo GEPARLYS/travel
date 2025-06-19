@@ -55,11 +55,12 @@ public class RouteServlet extends BaseServlet {
         }
 
         String keyword = request.getParameter("keyword");
+        String rname = request.getParameter("rname");
         String minPrice = request.getParameter("minPrice").replace(",","");
         String maxPrice = request.getParameter("maxPrice").replace(",","");
 
         try {
-            PageBean<Route> routePageListBean = routeService.findByCidPageBean(cid,currentPage,keyword,minPrice,maxPrice);
+            PageBean<Route> routePageListBean = routeService.findByCidPageBean(cid,currentPage,keyword,rname,minPrice,maxPrice);
             resultInfo.setData(routePageListBean);
         } catch (Exception e) {
             e.printStackTrace();

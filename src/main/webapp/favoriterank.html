@@ -55,8 +55,8 @@
                         "                        <span>"+totalPage+"</span>页<span>"+totalSize+"</span>条")
 
                     if(currentPage != 1){
-                        $(".pageNum ul").append("<li><a href=\"favoriterank.html?currentPage=1&rname="+rname+"&minPrice="+minPrice+"&maxPrice="+maxPrice+"\">首页</a></li>\n" +
-                            "                            <li class=\"threeword\"><a href=\"favoriterank.html?currentPage="+(currentPage-1)+"&rname="+rname+"&minPrice="+minPrice+"&maxPrice="+maxPrice+"\">上一页</a></li>")
+                        $(".pageNum ul").append("<li><a href=\"favoriterank.html?currentPage=1\">首页</a></li>\n" +
+                            "                            <li class=\"threeword\"><a href=\"favoriterank.html?currentPage="+(currentPage-1)+"\">上一页</a></li>")
                     }
                     var begin = 1
                     var end = 10
@@ -77,15 +77,15 @@
                         if (i == currentPage) {
                             $(".pageNum ul").append("<li style='background-color: orange'><a href=\"javascript:;\">"+i+"</a></li>")
                         }else {
-                            $(".pageNum ul").append("<li><a href=\"favoriterank.html?currentPage="+i+"&rname="+rname+"&minPrice="+minPrice+"&maxPrice="+maxPrice+"\">"+i+"</a></li>")
+                            $(".pageNum ul").append("<li><a href=\"favoriterank.html?currentPage="+i+"\">"+i+"</a></li>")
                         }
 
                     }
 
                     //如果当前页不等于总页数，就拼接
                     if(currentPage != totalPage){
-                        $(".pageNum ul").append("<li class=\"threeword\"><a href=\"favoriterank.html?currentPage="+(currentPage+1)+"&rname="+rname+"&minPrice="+minPrice+"&maxPrice="+maxPrice+"\">下一页</a></li>\n" +
-                            "                            <li class=\"threeword\"><a href=\"favoriterank.html?currentPage="+totalPage+"&rname="+rname+"&minPrice="+minPrice+"&maxPrice="+maxPrice+"\">末页</a></li>")
+                        $(".pageNum ul").append("<li class=\"threeword\"><a href=\"favoriterank.html?currentPage="+(currentPage+1)+"\">下一页</a></li>\n" +
+                            "                            <li class=\"threeword\"><a href=\"favoriterank.html?currentPage="+totalPage+"\">末页</a></li>")
                     }
 
                 }

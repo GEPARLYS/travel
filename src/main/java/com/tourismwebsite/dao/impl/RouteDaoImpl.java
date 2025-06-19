@@ -65,7 +65,7 @@ public class RouteDaoImpl implements RouteDao {
     }
 
     @Override
-    public Long findCountPage(Long cid, String keyword) {
+    public Long findCountPage(Long cid, String keyword, String rname, String minPrice, String maxPrice) {
         String sql = "select count(1) from tab_route where rflag = 1";
         ArrayList<Object> params = new ArrayList<>();
         if (!StringUtils.isEmpty(cid)){
@@ -74,8 +74,23 @@ public class RouteDaoImpl implements RouteDao {
         }
 
         if (!StringUtil.isEmpty(keyword)){
-            sql += " and rname = ?";
+            sql += " and rname like ?";
             params.add("%" + keyword + "%");
+        }
+
+        if (!StringUtil.isEmpty(rname)){
+            sql += " and rname like ?";
+            params.add("%" + rname + "%");
+        }
+        
+        if (!StringUtil.isEmpty(minPrice)){
+            sql += " and price >= ?";
+            params.add(minPrice);
+        }
+
+        if (!StringUtil.isEmpty(maxPrice)){
+            sql += " and price <= ?";
+            params.add(maxPrice);
         }
         Long totalSize = null;
         try {
@@ -233,7 +248,7 @@ public class RouteDaoImpl implements RouteDao {
     }
 
     @Override
-    public List<Route> findPageList(Long cid, Long currentPage, Integer pageSize, String keyword, String minPrice, String maxPrice) {
+    public List<Route> findPageList(Long cid, Long currentPage, Integer pageSize, String keyword, String rname, String minPrice, String maxPrice) {
         String sql = "select * from tab_route where rflag = 1";
         List<Object> params = new ArrayList<>();
         if (!StringUtils.isEmpty(cid)){
@@ -246,6 +261,11 @@ public class RouteDaoImpl implements RouteDao {
             params.add("%" + keyword + "%");
         }
         
+        if (!StringUtil.isEmpty(rname)){
+            sql += " and rname like ?";
+            params.add("%" + rname + "%");
+        }
+
         if (!StringUtil.isEmpty(minPrice)){
             sql += " and price >= ?";
             params.add(minPrice);

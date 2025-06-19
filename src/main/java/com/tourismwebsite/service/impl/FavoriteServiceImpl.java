@@ -190,7 +190,7 @@ public class FavoriteServiceImpl implements FavoriteService {
         favoritePageBean.setPageSize(pageSize);
         Long totalSize = favoriteDao.findMyFavoriteCount(user);
         favoritePageBean.setTotalSize(totalSize);
-
+        favoritePageBean.setCurrentPage(currentPage);
         List<Favorite> favoriteList = favoriteDao.findMyFavoritePageList(user, currentPage, pageSize);
         favoritePageBean.setList(favoriteList);
         return favoritePageBean;

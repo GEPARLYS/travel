@@ -1,6 +1,7 @@
 <!-- 头部 start -->
 <header id="header">
     <link rel="shortcut icon" href="images/icon_2.jpg"/>
+    <link rel="stylesheet" type="text/css" href="css/rout_list.css">
     <div class="top_banner">
         <img src="images/top_banner.jpg" alt="">
     </div>
@@ -49,42 +50,27 @@
                  data = eval("("+data+")");
 
                 $.each(data,function () {
-
                     $(".nav").append("<li><a href=\"route_list.html?cid="+this.cid+"&currentPage=1\">"+this.cname+"</a></li>")
                 });
                 $(".nav").append("<li><a href='favoriterank.html?currentPage=1'>收藏排行榜</a></li>")
 
 
 
-                // 添加点击事件处理
                 $(".nav li a").click(function() {
-                    // 移除所有li的active类
                     $(".nav li").removeClass("active");
-                    // 给当前点击的li添加active类
                     $(this).parent().addClass("active");
                 });
+
+                highlightActiveNav()
+                
             },"json");
 
 
-            function searchRoute(){
-                var cid = getParameter("cid");
-                location.href = "route_list.html?currentPage=1&cid="+cid+"&keyword="+$("#keyword").val();
-            }
-
-
-            var keyword = getParameter("keyword");
-            if (keyword) {
-                $("#keyword").val(decodeURIComponent(keyword)); // jQuery版，或 document.getElementById('keyword').value = keyword;
-            }
-
-            // 高亮当前页面对应的导航项
             function highlightActiveNav() {
                 var currentUrl = window.location.pathname;
                 var searchParams = new URLSearchParams(window.location.search);
                 var cid = searchParams.get('cid');
-
                 $(".nav li").removeClass("active");
-
                 if (currentUrl.includes("route_list.html") && cid) {
                     $(".nav li").each(function() {
                         var link = $(this).find("a").attr("href");
@@ -98,16 +84,37 @@
                     $(".nav li:first-child").addClass("active");
                 }
             }
-            
 
-/*
+
+
             function searchRoute(){
                 var cid = getParameter("cid");
                 location.href = "route_list.html?currentPage=1&cid="+cid+"&keyword="+$("#keyword").val();
             }
-*/
 
+            
+            // var keyword = getParameter("keyword");
+            // console.log(keyword)
+            // if (keyword) {
+            //     $("#keyword").val(decodeURIComponent(keyword)); // jQuery版，或 document.getElementById('keyword').value = keyword;
+            // }
 
+            var keyword = getParameter("keyword");
+            if (keyword == null || keyword == "null") {
+                keyword = ""
+            }else {
+                keyword = decodeURI(keyword)
+                
+            }
+
+            $("#keyword").val(keyword)
+
+         
+            
+         
+            // 自动高亮
+
+         
           
 
         </script>

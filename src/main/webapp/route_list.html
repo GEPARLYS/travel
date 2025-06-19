@@ -21,7 +21,7 @@
     var maxPrice = getParameter("maxPrice");
 
     // $.post("route","action=getRoutesByCid&cid="+cid+"&currentPage="+currentPage+"&keyword="+keyword,function (result) {
-    $.post("route", "action=getRoutesByCid&cid="+cid+"&currentPage=" + currentPage + "&keyword=" + keyword + "&minPrice=" + minPrice + "&maxPrice=" + maxPrice, function(result) {
+    $.post("route", "action=getRoutesByCid&cid="+cid+"&currentPage=" + currentPage + "&keyword=" + keyword + "&rname="+rname+"&minPrice=" + minPrice + "&maxPrice=" + maxPrice, function(result) {
 
         var data = result.data;//data就对应那个PageBean对象
         currentPage = data.currentPage;//当前页数
@@ -58,8 +58,8 @@
 
             //什么时候拼接首页上一页，当前页不等于1
             if(currentPage != 1){
-                $(".pageNum ul").append("<li><a href=\"route_list.html?cid="+cid+"&currentPage=1&keyword="+keyword+"\">首页</a></li>\n" +
-                    "                            <li class=\"threeword\"><a href=\"route_list.html?cid="+cid+"&currentPage="+(currentPage-1)+"&keyword="+keyword+"\">上一页</a></li>")
+                $(".pageNum ul").append("<li><a href=\"route_list.html?cid="+cid+"&currentPage=1&keyword="+keyword+"&rname="+rname+"\">首页</a></li>\n" +
+                    "                            <li class=\"threeword\"><a href=\"route_list.html?cid="+cid+"&currentPage="+(currentPage-1)+"&keyword="+keyword+"&rname="+rname+"\">上一页</a></li>")
             }
             var begin = 1;
             var end = 10;
@@ -93,10 +93,7 @@
         }
 
 
-        rname = decodeURI(keyword)
-        if (keyword == null || keyword == "null") {
-            keyword = ""
-        }
+
         rname = decodeURI(rname)
         if (rname == null || rname == "null") {
             rname = ""
@@ -118,7 +115,7 @@
         //跳转到favoriteRank
         //搜索的话，还需要携带搜索条件
         // location.href = "route_list.html?currentPage=1&rname="+$("#rname").val()+"&minPrice="+$("#minPrice").val()+"&maxPrice="+$("#maxPrice").val()
-        location.href = "route_list.html?cid="+cid+"&currentPage=1&keyword=" + $("#rname").val() + "&minPrice=" + $("#minPrice").val() + "&maxPrice=" + $("#maxPrice").val();
+        location.href = "route_list.html?cid="+cid+"&currentPage=1&rname=" + $("#rname").val() + "&minPrice=" + $("#minPrice").val() + "&maxPrice=" + $("#maxPrice").val();
 
     }
 

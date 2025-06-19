@@ -15,7 +15,7 @@ import java.util.Map;
 public interface RouteService {
     Map<String,List<Route>> hmCareChoose();
 
-    PageBean<Route> findByCidPageBean(Long cid, Long currentPage, String keyword, String minPrice, String maxPrice);
+    PageBean<Route> findByCidPageBean(Long cid, Long currentPage, String keyword, String rname, String minPrice, String maxPrice);
 
     Route findRouteByRid(Long rid);
 
