@@ -29,7 +29,7 @@ public class MyAppInitListener implements ServletContextListener {
         scheduler.scheduleAtFixedRate(
                 new RedisToDbSynTask(jedis,favoriteDao,routeDao),
                 0,
-                60,
+                60 * 60 * 24,
                 TimeUnit.SECONDS
         );
 
