@@ -4,6 +4,7 @@ import com.tourismwebsite.dao.FavoriteDao;
 import com.tourismwebsite.dao.RouteDao;
 import com.tourismwebsite.factory.BaseFactory;
 import com.tourismwebsite.timer.RedisToDbSynTask;
+import com.tourismwebsite.utils.CalculateUtil;
 import com.tourismwebsite.utils.JedisUtil;
 import redis.clients.jedis.Jedis;
 
@@ -29,7 +30,7 @@ public class MyAppInitListener implements ServletContextListener {
         scheduler.scheduleAtFixedRate(
                 new RedisToDbSynTask(jedis,favoriteDao,routeDao),
                 0,
-                60 * 60 * 24,
+                CalculateUtil.getExpireSeconds(),
                 TimeUnit.SECONDS
         );
 
