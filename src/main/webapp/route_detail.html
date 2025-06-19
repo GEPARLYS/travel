@@ -85,12 +85,12 @@
     $.post("route", "action=findRouteByRid&rid=" + rid, function (result) {
         //展示路线详情
         var route = result.data;
-        $(".bread_box").append("<a href=index.html\"/\">首页</a>\n" +
+        $(".bread_box").html("<a href=index.html\"/\">首页</a>\n" +
             "            <span> &gt;</span>\n" +
             "            <a href=\"#\">" + route.category.cname + "</a><span> &gt;</span>\n" +
             "            <a href=\"#\">" + route.rname + "</a>")
-        
-        $(".prosum_right").append("<p class=\"pros_title\">" + route.rname + "</p>\n" +
+
+        $(".prosum_right").html("<p class=\"pros_title\">" + route.rname + "</p>\n" +
             "                <p class=\"hot\">" + route.routeIntroduce + "</p>\n" +
             "                <div class=\"pros_other\">\n" +
             "                    <p>经营商家  :" + route.seller.sname + "</p>\n" +
@@ -100,13 +100,14 @@
             "                <div class=\"pros_price\">\n" +
             "                    <p class=\"price\"><strong>¥" + route.price + "</strong><span>起</span></p>\n" +
             "                    <p class=\"collect\">\n" +
-            "                        <a class=\"btn unFavorite\"><i class=\"glyphicon glyphicon-heart-empty\"></i>点击收藏</a>\n" +
+            "                        <a class=\"btn unFavorite\" style=\"display: none;\"><i class=\"glyphicon glyphicon-heart-empty\"></i>点击收藏</a>\n" +
             "\n" +
-            "                        <a  class=\"btn already\"><i class=\"glyphicon glyphicon-heart-empty\"></i>取消收藏</a>\n" +
+            "                        <a  class=\"btn already\" style=\"display: none;\"><i class=\"glyphicon glyphicon-heart-empty\"></i>取消收藏</a>\n" +
             "                        <span id='favoriteCount'>已收藏" + route.count + "次</span>\n" +
             "                    </p>\n" +
             "                </div>        ");
-
+        
+        
         
         //获取图片的集合
         var routeImgList = route.routeImgList;
@@ -156,8 +157,9 @@
             //自动播放
             var timer = setInterval("auto_play()", 5000);
         });
+
         
-        //当页面的内容加载出来了，判断当前路线是否可以被收藏
+
         //发送一个异步请求到服务器的FavoriteService进行判断
         $.post("favorite", "action=isFavorite&rid=" + route.rid, function (result) {
 
@@ -176,94 +178,68 @@
                 $(".unFavorite").show()
             }
             //2.改变收藏次数
-            $("#favoriteCount").html("已收藏"+favoriteCount+"次")
-          
+            $("#favoriteCount").html("已收藏" + favoriteCount + "次")
+
         }, "json")
 
+        function updateFavoriteUI(isFavorite,favoriteCount){
+            //先全部隐藏,在显示需要
+            $(".already, .unFavorite").hide();
+            if (isFavorite) {
+                //路线已收藏
+                //显示灰色，隐藏红色
+
+                $(".already").show()
+                
+                //2.改变收藏次数
+
+            } else {
+                //路线未收藏
+                //显示红色，隐藏灰色
+               
+                $(".unFavorite").show()
+
+
+            }
+            $("#favoriteCount").html("已收藏" + favoriteCount + "次")
+            
+
+        }
 
         //全局变量锁,防止多次点击
         var favoriteLock = false;
-
         function requestFindByRidIsFavorite() {
+            $(".already, .unFavorite").prop("disabled", true);
+
             $.post("favorite", "action=isFavorite&rid=" + route.rid, function (result) {
-                var flag = result.flag;
-                var favoriteCount = result.data.favoriteCount;
-                if (flag) {
-                    //路线已收藏
-                    //显示灰色，隐藏红色
-
-                    $(".already").show()
-                    $(".unFavorite").hide()
-                    //2.改变收藏次数
-
-                } else {
-                    //路线未收藏
-                    //显示红色，隐藏灰色
-                    $(".already").hide()
-                    $(".unFavorite").show()
-
-
-                }
-
-                //2.改变收藏次数
-                $("#favoriteCount").html("已收藏" + favoriteCount + "次")
-            }, "json")
+                var flag = result.flag && result.flag;
+                var favoriteCount = result &&
+                    result.data &&
+                    (result.data.favoriteCount !== undefined
+                        ? result.data.favoriteCount
+                        : 0);
+                updateFavoriteUI(flag,favoriteCount);
+                $(".already, .unFavorite").prop("disabled", false);
+            }, "json").fail(function (){
+                $(".already, .unFavorite").prop("disabled", false);
+                alert("网络异常!收藏状态获取失败,请重试!")
+            })
 
         }
 
 
-        //给红色的添加收藏按钮，绑定点击事件
-        $(".unFavorite").click(function () {
-            if (favoriteLock) return; //正在请求,直接返回
-            favoriteLock = true;
-            //点击之后，向服务器的FavoriteServlet发送异步请求
-            $.post("favorite", "action=addFavorite&rid=" + route.rid, function (result) {
-                favoriteLock = false; //请求回来后解锁
-                
-                var data = result.data;
-                var flag = result.flag;
-                if (data == -1) {
-                    //未登录
-                    //跳转到登录页面
-                    location.href = "login.html"
-                } else if (data == 0) {
-                    //操作异常
-                    alert("收藏失败");
-                } else if (data == 1){
-                    //已登录，添加成功
-                    //1.将红色按钮隐藏，灰色按钮显示
-                    // $(".unFavorite").hide();
-                    // $(".already").show();
-                    requestFindByRidIsFavorite();
 
-                }else {
-                    if (!flag){
-                        alert("服务器异常!")
-                    }
-                }
-            }, "json").fail(function () {
-
-                favoriteLock = false;//网络异常时也要解锁
-                // $btn.text("点击收藏").prop("disable",false);
-                console.log("网络异常!收藏失败,请重试!")
-            })
-        })
-
-
-        $(".already").click(function () {
+        $(".prosum_right").on('click', '.already', function () {
             if (favoriteLock) return;
             favoriteLock = true;
-
-            //点击之后，向服务器的FavoriteServlet发送异步请求
             $.post("favorite", "action=cancelFavorite&rid=" + route.rid, function (result) {
                 favoriteLock = false;
-                // $btn.text("取消收藏").prop("disabled",false);
                 var data = result.data;
                 var flag = result.flag;
                 if (data == -1) {
                     location.href = "login.html"
-                  
-                }else if (data == 0){
+
+                } else if (data == 0) {
                     alert("取消失败!!!");
                 } else if (data == 1) {
 
@@ -275,40 +251,173 @@
                     //2.改变收藏次数
                     // $("#favoriteCount").html("已收藏"+data+"次");
                     requestFindByRidIsFavorite();
-                }else{
-                    if (!flag){
+                } else {
+                    if (!flag) {
                         alert("服务器异常!")
                     }
                 }
             }, "json").fail(function () {
                 favoriteLock = false;
-                console.log("网络异常!取消收藏失败,请重试!")
+                alert("网络异常!取消收藏失败,请重试!")
             })
         })
-    }, "json");
 
-    //自动轮播方法
-    function auto_play() {
-        var cur_index = $('.prosum_left dd').find('a.cur_img').index();
-        cur_index = cur_index - 1;
-        var num = $('.little_img').length;
-        var max_index = 3;
-        if ((num - 1) < 3) {
-            max_index = num - 1;
+
+        // 给红色的添加收藏按钮，绑定点击事件
+        $(".prosum_right").on('click', '.unFavorite', function () {
+            if (favoriteLock) return;
+            favoriteLock = true;
+            $.post("favorite", "action=addFavorite&rid=" + route.rid, function (result) {
+                favoriteLock = false;
+                var data = result.data;
+                var flag = result.flag;
+                if (data == -1) {
+                    location.href = "login.html?redirect=" + encodeURIComponent(location.href);
+                } else if (data == 1) {
+                    requestFindByRidIsFavorite();
+                } else {
+                    if (!flag) {
+                        alert("服务器异常！！！")
+                    }
+                }
+            }, "json").fail(function () {
+                favoriteLock = false;
+                alert("网络异常!收藏失败,请重试!");
+            })
+        })
+        
+        
+
+     }, "json")
+
+
+/*    function requestFindByRidIsFavorite() {
+        $.post("favorite", "action=isFavorite&rid=" + route.rid, function (result) {
+            var flag = result.flag;
+            var favoriteCount = result.data.favoriteCount;
+            if (flag) {
+                //路线已收藏
+                //显示灰色，隐藏红色
+
+                $(".already").show()
+                $(".unFavorite").hide()
+                //2.改变收藏次数
+
+            } else {
+                //路线未收藏
+                //显示红色，隐藏灰色
+                $(".already").hide()
+                $(".unFavorite").show()
+
+
+            }
+
+            //2.改变收藏次数
+            $("#favoriteCount").html("已收藏" + favoriteCount + "次")
+        }, "json")
+
+    }*/
+
+
+
+    /* $(".unFavorite").click(function () {
+     if (favoriteLock) return; //正在请求,直接返回
+     favoriteLock = true;
+     //点击之后，向服务器的FavoriteServlet发送异步请求
+     $.post("favorite", "action=addFavorite&rid=" + route.rid, function (result) {
+         favoriteLock = false; //请求回来后解锁
+         
+         var data = result.data;
+         var flag = result.flag;
+         if (data == -1) {
+             //未登录
+             //跳转到登录页面
+             location.href = "login.html?redirect=" + encodeURIComponent(location.href);
+         } else if (data == 0) {
+             //操作异常
+             alert("收藏失败");
+         } else if (data == 1){
+             //已登录，添加成功
+             //1.将红色按钮隐藏，灰色按钮显示
+             // $(".unFavorite").hide();
+             // $(".already").show();
+             requestFindByRidIsFavorite();
+
+         }else {
+             if (!flag){
+                 alert("服务器异常!")
+             }
+         }
+     }, "json").fail(function () {
+
+         favoriteLock = false;//网络异常时也要解锁
+         // $btn.text("点击收藏").prop("disable",false);
+         console.log("网络异常!收藏失败,请重试!")
+     })
+ })*/
+
+
+
+
+    /*            $(".already").click(function () {
+                    if (favoriteLock) return;
+                    favoriteLock = true;
+    
+                    //点击之后，向服务器的FavoriteServlet发送异步请求
+                    $.post("favorite", "action=cancelFavorite&rid=" + route.rid, function (result) {
+                        favoriteLock = false;
+                        // $btn.text("取消收藏").prop("disabled",false);
+                        var data = result.data;
+                        var flag = result.flag;
+                        if (data == -1) {
+                            location.href = "login.html"
+    
+                        }else if (data == 0){
+                            alert("取消失败!!!");
+                        } else if (data == 1) {
+    
+                            //已登录，添加成功
+                            //1.将红色按钮隐藏，灰色按钮显示
+                            // $(".unFavorite").show();
+                            // $(".already").hide();
+    
+                            //2.改变收藏次数
+                            // $("#favoriteCount").html("已收藏"+data+"次");
+                            requestFindByRidIsFavorite();
+                        }else{
+                            if (!flag){
+                                alert("服务器异常!")
+                            }
+                        }
+                    }, "json").fail(function () {
+                        favoriteLock = false;
+                        console.log("网络异常!取消收藏失败,请重试!")
+                    })
+                })*/
+
+
+        //自动轮播方法
+        function auto_play() {
+            var cur_index = $('.prosum_left dd').find('a.cur_img').index();
+            cur_index = cur_index - 1;
+            var num = $('.little_img').length;
+            var max_index = 3;
+            if ((num - 1) < 3) {
+                max_index = num - 1;
+            }
+            if (cur_index < max_index) {
+                var next_index = cur_index + 1;
+                var big_pic = $('.little_img:eq(' + next_index + ')').data('bigpic');
+                $('.little_img').removeClass('cur_img');
+                $('.little_img:eq(' + next_index + ')').addClass('cur_img');
+                $('.big_img').attr('src', big_pic);
+            } else {
+                var big_pic = $('.little_img:eq(0)').data('bigpic');
+                $('.little_img').removeClass('cur_img');
+                $('.little_img:eq(0)').addClass('cur_img');
+                $('.big_img').attr('src', big_pic);
+            }
         }
-        if (cur_index < max_index) {
-            var next_index = cur_index + 1;
-            var big_pic = $('.little_img:eq(' + next_index + ')').data('bigpic');
-            $('.little_img').removeClass('cur_img');
-            $('.little_img:eq(' + next_index + ')').addClass('cur_img');
-            $('.big_img').attr('src', big_pic);
-        } else {
-            var big_pic = $('.little_img:eq(0)').data('bigpic');
-            $('.little_img').removeClass('cur_img');
-            $('.little_img:eq(0)').addClass('cur_img');
-            $('.big_img').attr('src', big_pic);
-        }
-    }
 </script>
 </body>
 

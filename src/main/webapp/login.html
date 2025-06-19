@@ -28,7 +28,13 @@
                 var errorMsg = result.errorMsg;
                 $("#errorMsg").html(errorMsg);
             }else{
-                location.href = "index.html";
+				var searchParams = new URLSearchParams(window.location.search);
+				var redirect = searchParams.get('redirect');
+				if (redirect) {
+					location.href = redirect; // 跳回原页面
+				} else {
+					location.href = "index.html"; // 没有就跳首页
+				}
             }
         },"json")
     }
