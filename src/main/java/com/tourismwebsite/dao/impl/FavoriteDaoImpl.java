@@ -108,8 +108,10 @@ public class FavoriteDaoImpl implements FavoriteDao {
 
         int[] ints = new int[0];
         try {
-            String sql = "insert ignore into tab_favorite (rid,date,uid) values(?,?,?)";
-            ints = jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            String sql1 = "truncate table tab_favorite";
+            jdbcTemplate.execute(sql1);
+            String sql2 = "insert into tab_favorite (rid,date,uid) values(?,?,?)";
+            ints = jdbcTemplate.batchUpdate(sql2, new BatchPreparedStatementSetter() {
                 @Override
                 public void setValues(PreparedStatement ps, int i) throws SQLException {
                     Param param = paramList.get(i);
