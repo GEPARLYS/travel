@@ -165,16 +165,16 @@
 
             var flag = result.flag;
             var favoriteCount = result.data.favoriteCount;
+            $(".already, .unFavorite").hide();
+
             if (flag) {
                 //路线已收藏
                 //显示灰色，隐藏红色
                 $(".already").show()
-                $(".unFavorite").hide()
 
             } else {
                 //路线未收藏
                 //显示红色，隐藏灰色
-                $(".already").hide()
                 $(".unFavorite").show()
             }
             //2.改变收藏次数
